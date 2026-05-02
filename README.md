@@ -7,18 +7,14 @@ A browser-based practice exam simulator for the Cisco 350-801 CLCOR (Implementin
 ## Features
 
 - **125 questions** covering all six exam domains with detailed explanations
-- **Multi-select questions** — "select all that apply" with checkbox-style UI
 - **Dark mode** with system preference detection and persistence
-- **Two modes**: Practice (instant feedback) and Exam (timed, 120 minutes)
-- **75-question exam cap** matching real exam question counts (10/25/50/75 selectable)
+- **Two modes**: Practice (instant feedback) and Exam (timed, 120 minutes, no going back — just like the real exam)
+- **110-question exam cap** matching real exam question counts (10/25/50/75/110 selectable)
 - **Progress persistence** — exam state auto-saves to localStorage; resume on reload
-- **Performance history** — tracks scores over time with a visual bar chart and stats
-- **Confirm before ending** — warning modal when finishing with unanswered questions
-- **Category filtering** — focus on specific domains or mix them all
-- **Question navigator** — jump between questions, track progress
-- **Flagging** — mark questions for review
-- **Keyboard shortcuts** — Arrow keys, 1-4 for options, F to flag, C to check
-- **Retry incorrect** — re-attempt only the questions you got wrong
+- **Performance history** — tracks scores over time
+- **Category filtering** — focus on specific domains or mix them all for a comprehensive exam
+- **Flagging** — mark questions for review at the end of the exam
+- **Retry incorrect** — you can re-attempt missing questions at the end of the exam
 - **Randomized** question and answer order each attempt
 
 ## Exam Domains Covered
@@ -62,9 +58,3 @@ python3 -m http.server 8090
 | `1`-`4` | Select option A-D |
 | `F` | Flag/unflag question |
 | `C` | Check answer (practice mode) |
-
-## Tech Stack
-
-- HTML5 + vanilla JavaScript (no build step)
-- Tailwind CSS (CDN)
-- Inter + JetBrains Mono fonts

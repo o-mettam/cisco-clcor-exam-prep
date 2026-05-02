@@ -111,7 +111,8 @@
                     <button onclick="setQuestionCount(10)" class="qcb px-4 py-2 rounded-lg border-2 border-slate-200 dark:border-slate-600 text-sm font-medium hover:border-cisco-blue transition-colors dark:text-slate-300">10</button>
                     <button onclick="setQuestionCount(25)" class="qcb px-4 py-2 rounded-lg border-2 border-slate-200 dark:border-slate-600 text-sm font-medium hover:border-cisco-blue transition-colors dark:text-slate-300">25</button>
                     <button onclick="setQuestionCount(50)" class="qcb px-4 py-2 rounded-lg border-2 border-slate-200 dark:border-slate-600 text-sm font-medium hover:border-cisco-blue transition-colors dark:text-slate-300">50</button>
-                    <button onclick="setQuestionCount(75)" class="qcb active px-4 py-2 rounded-lg border-2 border-cisco-blue bg-cisco-blue/10 text-cisco-blue text-sm font-medium">75 (Max)</button>
+                    <button onclick="setQuestionCount(75)" class="qcb px-4 py-2 rounded-lg border-2 border-slate-200 dark:border-slate-600 text-sm font-medium hover:border-cisco-blue transition-colors dark:text-slate-300">75</button>
+                    <button onclick="setQuestionCount(110)" class="qcb active px-4 py-2 rounded-lg border-2 border-cisco-blue bg-cisco-blue/10 text-cisco-blue text-sm font-medium">110 (Max)</button>
                 </div>
             </div>
             <button onclick="startExam()" id="startBtn" class="w-full bg-cisco-blue hover:bg-cisco-blue/90 text-white font-semibold py-4 rounded-xl transition-colors text-lg shadow-lg shadow-cisco-blue/20">
@@ -291,13 +292,13 @@ let userAnswers = {};   // { qIndex: selectedOptionIndex or Set for multi }
 let flagged = new Set();
 let revealed = new Set();
 let examMode = 'practice';
-let questionLimit = 75;  // default max 75
+let questionLimit = 110;  // default max 110
 let timerInterval = null;
 let secondsRemaining = 7200; // 120 min
 let startTime = null;
 let selectedCategories = new Set();
 const allCategories = [...new Set(questions.map(q => q.category))];
-const MAX_EXAM_QUESTIONS = 75;
+const MAX_EXAM_QUESTIONS = 110;
 
 // ====== DARK MODE ======
 function toggleDarkMode() {
@@ -651,8 +652,10 @@ function renderQuestion() {
     document.getElementById('currentQ').textContent = currentIndex + 1;
     document.getElementById('categoryBadge').textContent = q.category;
     document.getElementById('progressBar').style.width = `${((currentIndex + 1) / activeQuestions.length) * 100}%`;
-    document.getElementById('prevBtn').disabled = currentIndex === 0;
-    document.getElementById('prevBtn').classList.toggle('opacity-40', currentIndex === 0);
+    const canGoPrev = currentIndex > 0 && examMode !== 'exam';
+    document.getElementById('prevBtn').disabled = !canGoPrev;
+    document.getElementById('prevBtn').classList.toggle('opacity-40', !canGoPrev);
+    document.getElementById('prevBtn').classList.toggle('hidden', examMode === 'exam');
     const isLast = currentIndex === activeQuestions.length - 1;
     const nextBtn = document.getElementById('nextBtn');
     if (isLast && (examMode === 'exam' || revealed.has(currentIndex))) {
@@ -731,6 +734,7 @@ function nextQuestion() {
 }
 
 function prevQuestion() {
+    if (examMode === 'exam') return;
     if (currentIndex > 0) {
         currentIndex--;
         renderQuestion();
@@ -762,7 +766,12 @@ function showNavigator() {
         const btn = document.createElement('button');
         btn.className = `w-9 h-9 rounded-lg ${color} text-xs font-bold flex items-center justify-center hover:opacity-80 transition-opacity ${i === currentIndex ? 'ring-2 ring-offset-2 ring-cisco-dark' : ''}`;
         btn.textContent = i + 1;
-        btn.onclick = () => { currentIndex = i; renderQuestion(); hideNavigator(); };
+        if (examMode === 'exam' && i < currentIndex) {
+            btn.classList.add('opacity-40', 'cursor-not-allowed');
+            btn.classList.remove('hover:opacity-80');
+        } else {
+            btn.onclick = () => { currentIndex = i; renderQuestion(); hideNavigator(); };
+        }
         grid.appendChild(btn);
     });
     const answered = Object.keys(userAnswers).length;
@@ -956,7 +965,7 @@ function retryIncorrect() {
 document.addEventListener('keydown', (e) => {
     if (document.getElementById('examScreen').classList.contains('hidden')) return;
     if (e.key === 'ArrowRight' || e.key === 'n') nextQuestion();
-    else if (e.key === 'ArrowLeft' || e.key === 'p') prevQuestion();
+    else if ((e.key === 'ArrowLeft' || e.key === 'p') && examMode !== 'exam') prevQuestion();
     else if (e.key === 'f') flagQuestion();
     else if (e.key === 'c' && examMode === 'practice') checkAnswer();
     else if (e.key >= '1' && e.key <= '4') selectOption(parseInt(e.key) - 1);
