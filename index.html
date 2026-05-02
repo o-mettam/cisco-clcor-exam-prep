@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CCNP CLCOR 350-801 v2.0 Exam Simulator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        cisco: { blue:'#049fd9', dark:'#00253d', navy:'#00bceb', green:'#6cc04a', red:'#cf2030', gray:'#58585b' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: 'Inter', system-ui, sans-serif; }
+        .cli-block {
+            font-family: 'JetBrains Mono', monospace;
+            background: #1a1a2e; color: #00ff88;
+            border-radius: 8px; padding: 16px; font-size: 0.82rem;
+            line-height: 1.7; overflow-x: auto; white-space: pre-wrap;
+            border: 1px solid #333;
+        }
+        .option-btn { transition: all 0.2s ease; cursor: pointer; }
+        .option-btn:hover:not(.selected):not(.correct):not(.incorrect) {
+            transform: translateX(4px); border-color: #049fd9; background: rgba(4,159,217,0.05);
+        }
+        .option-btn.selected { border-color: #049fd9; background: rgba(4,159,217,0.1); box-shadow: 0 0 0 2px rgba(4,159,217,0.2); }
+        .option-btn.correct { border-color: #6cc04a; background: rgba(108,192,74,0.1); box-shadow: 0 0 0 2px rgba(108,192,74,0.2); }
+        .option-btn.incorrect { border-color: #cf2030; background: rgba(207,32,48,0.1); box-shadow: 0 0 0 2px rgba(207,32,48,0.2); }
+        .option-btn.disabled { pointer-events: none; }
+        .progress-ring { transition: stroke-dashoffset 0.8s ease; transform: rotate(-90deg); transform-origin: 50% 50%; }
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen">
+
+<!-- ============ START SCREEN ============ -->
+<div id="startScreen" class="min-h-screen flex items-center justify-center p-4">
+    <div class="max-w-2xl w-full">
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center gap-2 bg-cisco-blue/10 text-cisco-blue px-4 py-2 rounded-full text-sm font-medium mb-6">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                CCNP Collaboration
+            </div>
+            <h1 class="text-4xl font-extrabold text-cisco-dark mb-3">CLCOR 350-801 <span class="text-cisco-blue">v2.0</span></h1>
+            <p class="text-lg text-slate-500">Exam Practice Simulator</p>
+        </div>
+        <div class="bg-white rounded-2xl shadow-lg border border-slate-200 p-8">
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <div class="bg-slate-50 rounded-xl p-4 text-center">
+                    <div class="text-2xl font-bold text-cisco-dark" id="totalQCount">65</div>
+                    <div class="text-xs text-slate-500 mt-1">Total Questions</div>
+                </div>
+                <div class="bg-slate-50 rounded-xl p-4 text-center">
+                    <div class="text-2xl font-bold text-cisco-dark">120 min</div>
+                    <div class="text-xs text-slate-500 mt-1">Time Limit</div>
+                </div>
+            </div>
+            <h3 class="font-semibold text-cisco-dark mb-3">Focus Areas</h3>
+            <div id="categoryFilters" class="flex flex-wrap gap-2 mb-6"></div>
+            <div class="mb-6">
+                <h3 class="font-semibold text-cisco-dark mb-3">Exam Mode</h3>
+                <div class="grid grid-cols-2 gap-3">
+                    <label class="flex items-center gap-3 p-3 rounded-xl border-2 border-slate-200 cursor-pointer hover:border-cisco-blue transition-colors has-[:checked]:border-cisco-blue has-[:checked]:bg-cisco-blue/5">
+                        <input type="radio" name="mode" value="practice" checked class="accent-cisco-blue w-4 h-4">
+                        <div><div class="font-medium text-sm">Practice</div><div class="text-xs text-slate-400">Show answers after each question</div></div>
+                    </label>
+                    <label class="flex items-center gap-3 p-3 rounded-xl border-2 border-slate-200 cursor-pointer hover:border-cisco-blue transition-colors has-[:checked]:border-cisco-blue has-[:checked]:bg-cisco-blue/5">
+                        <input type="radio" name="mode" value="exam" class="accent-cisco-blue w-4 h-4">
+                        <div><div class="font-medium text-sm">Exam</div><div class="text-xs text-slate-400">Timed, results at end</div></div>
+                    </label>
+                </div>
+            </div>
+            <div class="mb-6">
+                <h3 class="font-semibold text-cisco-dark mb-3">Number of Questions</h3>
+                <div class="flex gap-2" id="qCountBtns">
+                    <button onclick="setQuestionCount(10)" class="qcb px-4 py-2 rounded-lg border-2 border-slate-200 text-sm font-medium hover:border-cisco-blue transition-colors">10</button>
+                    <button onclick="setQuestionCount(25)" class="qcb px-4 py-2 rounded-lg border-2 border-slate-200 text-sm font-medium hover:border-cisco-blue transition-colors">25</button>
+                    <button onclick="setQuestionCount(50)" class="qcb px-4 py-2 rounded-lg border-2 border-slate-200 text-sm font-medium hover:border-cisco-blue transition-colors">50</button>
+                    <button onclick="setQuestionCount(0)" class="qcb active px-4 py-2 rounded-lg border-2 border-cisco-blue bg-cisco-blue/10 text-cisco-blue text-sm font-medium">All</button>
+                </div>
+            </div>
+            <button onclick="startExam()" class="w-full bg-cisco-blue hover:bg-cisco-blue/90 text-white font-semibold py-4 rounded-xl transition-colors text-lg shadow-lg shadow-cisco-blue/20">
+                Start Exam
+            </button>
+        </div>
+        <p class="text-center text-xs text-slate-400 mt-6">Based on the official Cisco 350-801 CLCOR v2.0 exam blueprint.<br>Heavy focus: QoS &amp; CUBE/IOS-XE CLI Operations</p>
+    </div>
+</div>
+
+<!-- ============ EXAM SCREEN ============ -->
+<div id="examScreen" class="hidden min-h-screen">
+    <div class="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-slate-200 shadow-sm">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <h2 class="font-bold text-cisco-dark text-sm hidden sm:block">CLCOR 350-801</h2>
+                <span id="categoryBadge" class="text-xs px-2.5 py-1 rounded-full bg-cisco-blue/10 text-cisco-blue font-medium"></span>
+            </div>
+            <div class="flex items-center gap-4 sm:gap-6">
+                <div class="flex items-center gap-2 text-sm">
+                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <span id="timer" class="font-mono font-semibold text-cisco-dark">120:00</span>
+                </div>
+                <div class="text-sm font-medium text-slate-500">
+                    <span id="currentQ" class="text-cisco-dark font-bold">1</span>/<span id="totalQ">65</span>
+                </div>
+                <button onclick="showNavigator()" class="p-2 rounded-lg hover:bg-slate-100 transition-colors" title="Question Navigator">
+                    <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+                </button>
+            </div>
+        </div>
+        <div class="h-1 bg-slate-100">
+            <div id="progressBar" class="h-full bg-gradient-to-r from-cisco-blue to-cisco-navy transition-all duration-500" style="width:0%"></div>
+        </div>
+    </div>
+    <div class="max-w-4xl mx-auto px-4 py-8">
+        <div id="questionArea" class="fade-in"></div>
+        <div class="flex items-center justify-between mt-8 pt-6 border-t border-slate-200">
+            <button onclick="prevQuestion()" id="prevBtn" class="flex items-center gap-2 px-5 py-2.5 rounded-xl border-2 border-slate-200 text-slate-600 font-medium hover:border-slate-300 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                Prev
+            </button>
+            <div class="flex gap-2">
+                <button onclick="flagQuestion()" id="flagBtn" class="flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 border-amber-200 text-amber-600 font-medium hover:bg-amber-50 transition-colors text-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"/></svg>
+                    Flag
+                </button>
+                <button onclick="checkAnswer()" id="checkBtn" class="hidden px-5 py-2.5 rounded-xl bg-cisco-green text-white font-medium hover:bg-cisco-green/90 transition-colors text-sm shadow-lg shadow-cisco-green/20">
+                    Check Answer
+                </button>
+            </div>
+            <button onclick="nextQuestion()" id="nextBtn" class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-cisco-blue text-white font-medium hover:bg-cisco-blue/90 transition-colors shadow-lg shadow-cisco-blue/20">
+                Next
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ============ NAVIGATOR MODAL ============ -->
+<div id="navigatorModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onclick="if(event.target===this)hideNavigator()">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[80vh] overflow-hidden">
+        <div class="p-6 border-b border-slate-200 flex items-center justify-between">
+            <h3 class="font-bold text-lg text-cisco-dark">Question Navigator</h3>
+            <button onclick="hideNavigator()" class="p-1 rounded-lg hover:bg-slate-100">
+                <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <div class="p-6 overflow-y-auto max-h-[60vh]">
+            <div class="flex flex-wrap gap-3 mb-4 text-xs">
+                <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-slate-200 inline-block"></span>Unanswered</span>
+                <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-cisco-blue inline-block"></span>Answered</span>
+                <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-amber-400 inline-block"></span>Flagged</span>
+                <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-cisco-green inline-block"></span>Correct</span>
+                <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-cisco-red inline-block"></span>Incorrect</span>
+            </div>
+            <div id="navigatorGrid" class="grid grid-cols-8 gap-2"></div>
+        </div>
+        <div class="p-4 border-t border-slate-200 bg-slate-50 flex justify-between items-center">
+            <span class="text-sm text-slate-500" id="navStats"></span>
+            <button onclick="endExam()" class="px-4 py-2 rounded-lg bg-cisco-red text-white text-sm font-medium hover:bg-cisco-red/90 transition-colors">End Exam</button>
+        </div>
+    </div>
+</div>
+
+<!-- ============ RESULTS SCREEN ============ -->
+<div id="resultsScreen" class="hidden min-h-screen bg-slate-50 p-4">
+    <div class="max-w-3xl mx-auto py-8">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-extrabold text-cisco-dark mb-2">Exam Complete</h1>
+            <p class="text-slate-500">CLCOR 350-801 v2.0 Practice Results</p>
+        </div>
+        <div class="bg-white rounded-2xl shadow-lg border border-slate-200 p-8 mb-6">
+            <div class="flex items-center justify-center mb-8">
+                <div class="relative">
+                    <svg class="w-40 h-40" viewBox="0 0 120 120">
+                        <circle cx="60" cy="60" r="54" fill="none" stroke="#e2e8f0" stroke-width="8"/>
+                        <circle id="scoreCircle" cx="60" cy="60" r="54" fill="none" stroke="#049fd9" stroke-width="8" stroke-linecap="round" class="progress-ring" stroke-dasharray="339.29" stroke-dashoffset="339.29"/>
+                    </svg>
+                    <div class="absolute inset-0 flex flex-col items-center justify-center">
+                        <span id="scorePercent" class="text-3xl font-extrabold text-cisco-dark">0%</span>
+                        <span id="passFailLabel" class="text-xs font-semibold mt-1 px-2 py-0.5 rounded-full">SCORE</span>
+                    </div>
+                </div>
+            </div>
+            <div class="grid grid-cols-4 gap-4 mb-8">
+                <div class="text-center p-3 bg-cisco-green/10 rounded-xl"><div id="correctCount" class="text-2xl font-bold text-cisco-green">0</div><div class="text-xs text-slate-500">Correct</div></div>
+                <div class="text-center p-3 bg-cisco-red/10 rounded-xl"><div id="incorrectCount" class="text-2xl font-bold text-cisco-red">0</div><div class="text-xs text-slate-500">Incorrect</div></div>
+                <div class="text-center p-3 bg-slate-100 rounded-xl"><div id="skippedCount" class="text-2xl font-bold text-slate-500">0</div><div class="text-xs text-slate-500">Skipped</div></div>
+                <div class="text-center p-3 bg-cisco-blue/10 rounded-xl"><div id="timeTaken" class="text-2xl font-bold text-cisco-blue">0:00</div><div class="text-xs text-slate-500">Time</div></div>
+            </div>
+            <h3 class="font-bold text-cisco-dark mb-4">Performance by Category</h3>
+            <div id="categoryBreakdown" class="space-y-3"></div>
+        </div>
+        <div class="bg-white rounded-2xl shadow-lg border border-slate-200 p-8 mb-6">
+            <h3 class="font-bold text-cisco-dark mb-4">Review Questions</h3>
+            <div class="flex gap-2 mb-4 flex-wrap">
+                <button onclick="filterReview('all')" class="review-filter active px-3 py-1.5 rounded-lg text-xs font-medium border-2 border-cisco-blue bg-cisco-blue/10 text-cisco-blue">All</button>
+                <button onclick="filterReview('incorrect')" class="review-filter px-3 py-1.5 rounded-lg text-xs font-medium border-2 border-slate-200 text-slate-500">Incorrect</button>
+                <button onclick="filterReview('flagged')" class="review-filter px-3 py-1.5 rounded-lg text-xs font-medium border-2 border-slate-200 text-slate-500">Flagged</button>
+            </div>
+            <div id="reviewList" class="space-y-4 max-h-[600px] overflow-y-auto pr-2"></div>
+        </div>
+        <div class="flex gap-4">
+            <button onclick="location.reload()" class="flex-1 py-4 rounded-xl border-2 border-slate-200 font-semibold text-slate-600 hover:border-slate-300 transition-colors">New Exam</button>
+            <button onclick="retryIncorrect()" id="retryBtn" class="flex-1 py-4 rounded-xl bg-cisco-blue text-white font-semibold hover:bg-cisco-blue/90 transition-colors shadow-lg shadow-cisco-blue/20">Retry Incorrect</button>
+        </div>
+    </div>
+</div>
+
+<script src="questions.js"></script>
+<script>
+// ====== STATE ======
+let activeQuestions = [];
+let currentIndex = 0;
+let userAnswers = {};   // { qIndex: selectedOptionIndex }
+let flagged = new Set();
+let revealed = new Set();
+let examMode = 'practice';
+let questionLimit = 0;  // 0 = all
+let timerInterval = null;
+let secondsRemaining = 7200; // 120 min
+let startTime = null;
+let selectedCategories = new Set();
+const allCategories = [...new Set(questions.map(q => q.category))];
+
+// ====== INIT ======
+function init() {
+    const container = document.getElementById('categoryFilters');
+    const catColors = { 'QoS':'bg-purple-100 text-purple-700 border-purple-200','CUBE':'bg-blue-100 text-blue-700 border-blue-200',
+        'IOS XE Gateway':'bg-teal-100 text-teal-700 border-teal-200','Protocols':'bg-orange-100 text-orange-700 border-orange-200',
+        'Infrastructure':'bg-green-100 text-green-700 border-green-200','Call Control':'bg-rose-100 text-rose-700 border-rose-200',
+        'Collaboration Apps':'bg-indigo-100 text-indigo-700 border-indigo-200' };
+    allCategories.forEach(cat => {
+        selectedCategories.add(cat);
+        const count = questions.filter(q => q.category === cat).length;
+        const colors = catColors[cat] || 'bg-slate-100 text-slate-700 border-slate-200';
+        const btn = document.createElement('button');
+        btn.className = `category-chip px-3 py-1.5 rounded-lg text-xs font-medium border-2 ${colors} ring-2 ring-offset-1 ring-current/30 transition-all`;
+        btn.innerHTML = `${cat} <span class="opacity-60">(${count})</span>`;
+        btn.dataset.cat = cat;
+        btn.onclick = () => toggleCategory(cat, btn);
+        container.appendChild(btn);
+    });
+    document.getElementById('totalQCount').textContent = questions.length;
+}
+
+function toggleCategory(cat, btn) {
+    if (selectedCategories.has(cat)) {
+        if (selectedCategories.size === 1) return; // must keep at least one
+        selectedCategories.delete(cat);
+        btn.classList.remove('ring-2','ring-offset-1','ring-current/30');
+        btn.classList.add('opacity-40');
+    } else {
+        selectedCategories.add(cat);
+        btn.classList.add('ring-2','ring-offset-1','ring-current/30');
+        btn.classList.remove('opacity-40');
+    }
+    updateAvailableCount();
+}
+
+function updateAvailableCount() {
+    const available = questions.filter(q => selectedCategories.has(q.category)).length;
+    document.getElementById('totalQCount').textContent = questionLimit === 0 ? available : Math.min(questionLimit, available);
+}
+
+function setQuestionCount(n) {
+    questionLimit = n;
+    document.querySelectorAll('.qcb').forEach(b => {
+        b.classList.remove('border-cisco-blue','bg-cisco-blue/10','text-cisco-blue');
+        b.classList.add('border-slate-200');
+    });
+    event.target.classList.add('border-cisco-blue','bg-cisco-blue/10','text-cisco-blue');
+    event.target.classList.remove('border-slate-200');
+    updateAvailableCount();
+}
+
+// ====== EXAM START ======
+function startExam() {
+    examMode = document.querySelector('input[name="mode"]:checked').value;
+    let pool = questions.filter(q => selectedCategories.has(q.category));
+    // Shuffle
+    for (let i = pool.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+    if (questionLimit > 0) pool = pool.slice(0, questionLimit);
+    // Shuffle options for each question
+    activeQuestions = pool.map(q => {
+        const shuffled = [...q.options];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return { ...q, options: shuffled };
+    });
+    currentIndex = 0;
+    userAnswers = {};
+    flagged = new Set();
+    revealed = new Set();
+    startTime = Date.now();
+    secondsRemaining = examMode === 'exam' ? 7200 : 0;
+
+    document.getElementById('startScreen').classList.add('hidden');
+    document.getElementById('examScreen').classList.remove('hidden');
+    document.getElementById('totalQ').textContent = activeQuestions.length;
+    document.getElementById('checkBtn').classList.toggle('hidden', examMode === 'exam');
+
+    startTimer();
+    renderQuestion();
+}
+
+function startTimer() {
+    if (timerInterval) clearInterval(timerInterval);
+    updateTimerDisplay();
+    timerInterval = setInterval(() => {
+        if (examMode === 'exam') {
+            secondsRemaining--;
+            if (secondsRemaining <= 0) { clearInterval(timerInterval); endExam(); return; }
+        } else {
+            secondsRemaining++;
+        }
+        updateTimerDisplay();
+    }, 1000);
+}
+
+function updateTimerDisplay() {
+    const el = document.getElementById('timer');
+    if (examMode === 'exam') {
+        const m = Math.floor(secondsRemaining / 60);
+        const s = secondsRemaining % 60;
+        el.textContent = `${m}:${s.toString().padStart(2,'0')}`;
+        if (secondsRemaining < 300) el.classList.add('text-cisco-red');
+        else el.classList.remove('text-cisco-red');
+    } else {
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        const m = Math.floor(elapsed / 60);
+        const s = elapsed % 60;
+        el.textContent = `${m}:${s.toString().padStart(2,'0')}`;
+        el.classList.remove('text-cisco-red');
+    }
+}
+
+// ====== RENDER QUESTION ======
+function renderQuestion() {
+    const q = activeQuestions[currentIndex];
+    const area = document.getElementById('questionArea');
+    const isRevealed = revealed.has(currentIndex);
+    const userAns = userAnswers[currentIndex];
+
+    let html = `<div class="fade-in">`;
+    // Header
+    html += `<div class="flex items-center gap-3 mb-4 flex-wrap">
+        <span class="text-xs font-bold text-slate-400">Q${currentIndex + 1}</span>
+        <span class="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-500">${q.subcategory}</span>
+        <span class="text-xs px-2 py-0.5 rounded-full ${q.difficulty === 'hard' ? 'bg-red-100 text-red-600' : q.difficulty === 'medium' ? 'bg-amber-100 text-amber-600' : 'bg-green-100 text-green-600'}">${q.difficulty}</span>
+    </div>`;
+    // Question text
+    html += `<h2 class="text-lg font-semibold text-cisco-dark mb-4 leading-relaxed">${q.question}</h2>`;
+    // CLI context
+    if (q.cli_context) {
+        html += `<div class="cli-block mb-6">${escapeHtml(q.cli_context)}</div>`;
+    }
+    // Options
+    html += `<div class="space-y-3 mb-6">`;
+    q.options.forEach((opt, i) => {
+        let stateClass = '';
+        if (isRevealed) {
+            if (opt.correct) stateClass = 'correct';
+            else if (userAns === i) stateClass = 'incorrect';
+            stateClass += ' disabled';
+        } else if (userAns === i) {
+            stateClass = 'selected';
+        }
+        const letter = String.fromCharCode(65 + i);
+        const optText = opt.text.includes('\n')
+            ? `<pre class="font-mono text-sm leading-relaxed whitespace-pre-wrap">${escapeHtml(opt.text)}</pre>`
+            : `<span>${escapeHtml(opt.text)}</span>`;
+        html += `<div class="option-btn flex items-start gap-3 p-4 rounded-xl border-2 border-slate-200 ${stateClass}" onclick="selectOption(${i})">
+            <span class="flex-shrink-0 w-7 h-7 rounded-full border-2 ${stateClass === 'correct' ? 'border-cisco-green bg-cisco-green text-white' : stateClass.includes('incorrect') ? 'border-cisco-red bg-cisco-red text-white' : userAns === i ? 'border-cisco-blue bg-cisco-blue text-white' : 'border-slate-300 text-slate-400'} flex items-center justify-center text-xs font-bold">${isRevealed && opt.correct ? '✓' : isRevealed && userAns === i && !opt.correct ? '✗' : letter}</span>
+            <div class="flex-1 text-sm text-slate-700">${optText}</div>
+        </div>`;
+    });
+    html += `</div>`;
+    // Explanation
+    if (isRevealed) {
+        const wasCorrect = q.options[userAns]?.correct;
+        html += `<div class="p-5 rounded-xl ${wasCorrect ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'} mb-4 fade-in">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="text-sm font-bold ${wasCorrect ? 'text-green-700' : 'text-red-700'}">${wasCorrect ? '✓ Correct!' : '✗ Incorrect'}</span>
+            </div>
+            <div class="text-sm text-slate-700 leading-relaxed">${q.explanation}</div>
+        </div>`;
+    }
+    html += `</div>`;
+    area.innerHTML = html;
+
+    // Update UI
+    document.getElementById('currentQ').textContent = currentIndex + 1;
+    document.getElementById('categoryBadge').textContent = q.category;
+    document.getElementById('progressBar').style.width = `${((currentIndex + 1) / activeQuestions.length) * 100}%`;
+    document.getElementById('prevBtn').disabled = currentIndex === 0;
+    document.getElementById('prevBtn').classList.toggle('opacity-40', currentIndex === 0);
+    const isLast = currentIndex === activeQuestions.length - 1;
+    const nextBtn = document.getElementById('nextBtn');
+    if (isLast && (examMode === 'exam' || revealed.has(currentIndex))) {
+        nextBtn.innerHTML = 'Finish <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>';
+        nextBtn.classList.remove('bg-cisco-blue','shadow-cisco-blue/20');
+        nextBtn.classList.add('bg-cisco-green','shadow-cisco-green/20');
+    } else {
+        nextBtn.innerHTML = 'Next <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>';
+        nextBtn.classList.add('bg-cisco-blue','shadow-cisco-blue/20');
+        nextBtn.classList.remove('bg-cisco-green','shadow-cisco-green/20');
+    }
+    // Flag state
+    const flagBtn = document.getElementById('flagBtn');
+    if (flagged.has(currentIndex)) {
+        flagBtn.classList.add('bg-amber-50','border-amber-400');
+        flagBtn.innerHTML = '<svg class="w-4 h-4" fill="currentColor" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"/></svg> Flagged';
+    } else {
+        flagBtn.classList.remove('bg-amber-50','border-amber-400');
+        flagBtn.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"/></svg> Flag';
+    }
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// ====== INTERACTIONS ======
+function selectOption(i) {
+    if (revealed.has(currentIndex)) return;
+    userAnswers[currentIndex] = i;
+    renderQuestion();
+}
+
+function checkAnswer() {
+    if (userAnswers[currentIndex] === undefined) return;
+    revealed.add(currentIndex);
+    renderQuestion();
+}
+
+function flagQuestion() {
+    if (flagged.has(currentIndex)) flagged.delete(currentIndex);
+    else flagged.add(currentIndex);
+    renderQuestion();
+}
+
+function nextQuestion() {
+    if (examMode === 'practice' && userAnswers[currentIndex] !== undefined && !revealed.has(currentIndex)) {
+        checkAnswer();
+        return;
+    }
+    if (currentIndex < activeQuestions.length - 1) {
+        currentIndex++;
+        renderQuestion();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+        endExam();
+    }
+}
+
+function prevQuestion() {
+    if (currentIndex > 0) {
+        currentIndex--;
+        renderQuestion();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+}
+
+// ====== NAVIGATOR ======
+function showNavigator() {
+    const grid = document.getElementById('navigatorGrid');
+    grid.innerHTML = '';
+    activeQuestions.forEach((q, i) => {
+        let color = 'bg-slate-200 text-slate-600';
+        if (revealed.has(i)) {
+            const correct = q.options[userAnswers[i]]?.correct;
+            color = correct ? 'bg-cisco-green text-white' : 'bg-cisco-red text-white';
+        } else if (flagged.has(i)) {
+            color = 'bg-amber-400 text-white';
+        } else if (userAnswers[i] !== undefined) {
+            color = 'bg-cisco-blue text-white';
+        }
+        const btn = document.createElement('button');
+        btn.className = `w-9 h-9 rounded-lg ${color} text-xs font-bold flex items-center justify-center hover:opacity-80 transition-opacity ${i === currentIndex ? 'ring-2 ring-offset-2 ring-cisco-dark' : ''}`;
+        btn.textContent = i + 1;
+        btn.onclick = () => { currentIndex = i; renderQuestion(); hideNavigator(); };
+        grid.appendChild(btn);
+    });
+    const answered = Object.keys(userAnswers).length;
+    document.getElementById('navStats').textContent = `${answered}/${activeQuestions.length} answered · ${flagged.size} flagged`;
+    document.getElementById('navigatorModal').classList.remove('hidden');
+}
+
+function hideNavigator() {
+    document.getElementById('navigatorModal').classList.add('hidden');
+}
+
+// ====== END EXAM ======
+function endExam() {
+    if (timerInterval) clearInterval(timerInterval);
+    // In exam mode, reveal all answers
+    if (examMode === 'exam') {
+        activeQuestions.forEach((_, i) => revealed.add(i));
+    }
+    const elapsed = Math.floor((Date.now() - startTime) / 1000);
+    let correct = 0, incorrect = 0, skipped = 0;
+    const catStats = {};
+
+    activeQuestions.forEach((q, i) => {
+        if (!catStats[q.category]) catStats[q.category] = { correct: 0, total: 0 };
+        catStats[q.category].total++;
+        if (userAnswers[i] === undefined) { skipped++; }
+        else if (q.options[userAnswers[i]]?.correct) { correct++; catStats[q.category].correct++; }
+        else { incorrect++; }
+    });
+
+    const total = activeQuestions.length;
+    const pct = Math.round((correct / total) * 100);
+    const pass = pct >= 70;
+
+    // Show results screen
+    document.getElementById('examScreen').classList.add('hidden');
+    document.getElementById('resultsScreen').classList.remove('hidden');
+
+    // Score ring
+    const circle = document.getElementById('scoreCircle');
+    const circumference = 339.29;
+    circle.style.strokeDashoffset = circumference - (pct / 100) * circumference;
+    circle.style.stroke = pass ? '#6cc04a' : '#cf2030';
+    document.getElementById('scorePercent').textContent = pct + '%';
+    const pfLabel = document.getElementById('passFailLabel');
+    pfLabel.textContent = pass ? 'PASS' : 'FAIL';
+    pfLabel.className = `text-xs font-semibold mt-1 px-2 py-0.5 rounded-full ${pass ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`;
+
+    document.getElementById('correctCount').textContent = correct;
+    document.getElementById('incorrectCount').textContent = incorrect;
+    document.getElementById('skippedCount').textContent = skipped;
+    const em = Math.floor(elapsed / 60);
+    const es = elapsed % 60;
+    document.getElementById('timeTaken').textContent = `${em}:${es.toString().padStart(2,'0')}`;
+
+    // Category breakdown
+    const breakdown = document.getElementById('categoryBreakdown');
+    breakdown.innerHTML = '';
+    Object.entries(catStats).forEach(([cat, s]) => {
+        const cpct = Math.round((s.correct / s.total) * 100);
+        breakdown.innerHTML += `<div class="flex items-center gap-4">
+            <span class="text-sm font-medium text-slate-600 w-40 shrink-0">${cat}</span>
+            <div class="flex-1 h-3 bg-slate-100 rounded-full overflow-hidden">
+                <div class="h-full rounded-full transition-all duration-700 ${cpct >= 70 ? 'bg-cisco-green' : cpct >= 50 ? 'bg-amber-400' : 'bg-cisco-red'}" style="width:${cpct}%"></div>
+            </div>
+            <span class="text-sm font-bold text-slate-700 w-20 text-right">${s.correct}/${s.total} (${cpct}%)</span>
+        </div>`;
+    });
+
+    // Review list
+    buildReviewList('all');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function buildReviewList(filter) {
+    const list = document.getElementById('reviewList');
+    list.innerHTML = '';
+    activeQuestions.forEach((q, i) => {
+        const userAns = userAnswers[i];
+        const isCorrect = userAns !== undefined && q.options[userAns]?.correct;
+        const isFlagged = flagged.has(i);
+
+        if (filter === 'incorrect' && (isCorrect || userAns === undefined)) return;
+        if (filter === 'flagged' && !isFlagged) return;
+
+        const correctOpt = q.options.find(o => o.correct);
+        const userOpt = userAns !== undefined ? q.options[userAns] : null;
+
+        list.innerHTML += `<div class="p-4 rounded-xl border ${isCorrect ? 'border-green-200 bg-green-50/50' : userAns === undefined ? 'border-slate-200 bg-slate-50' : 'border-red-200 bg-red-50/50'}">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="text-xs font-bold ${isCorrect ? 'text-green-600' : userAns === undefined ? 'text-slate-400' : 'text-red-600'}">Q${i+1} ${isCorrect ? '✓' : userAns === undefined ? '—' : '✗'}</span>
+                <span class="text-xs px-1.5 py-0.5 rounded bg-slate-200 text-slate-500">${q.category}</span>
+                ${isFlagged ? '<span class="text-xs px-1.5 py-0.5 rounded bg-amber-200 text-amber-700">Flagged</span>' : ''}
+            </div>
+            <p class="text-sm font-medium text-cisco-dark mb-2">${q.question.replace(/<code>/g,'<code class="bg-slate-200 px-1 rounded text-xs font-mono">').replace(/<\/code>/g,'</code>')}</p>
+            ${userOpt && !isCorrect ? `<p class="text-xs text-red-600 mb-1"><strong>Your answer:</strong> ${escapeHtml(userOpt.text.split('\n')[0])}</p>` : ''}
+            <p class="text-xs text-green-700"><strong>Correct:</strong> ${escapeHtml(correctOpt.text.split('\n')[0])}</p>
+            <details class="mt-2"><summary class="text-xs text-cisco-blue cursor-pointer font-medium">Show explanation</summary>
+            <p class="text-xs text-slate-600 mt-2 leading-relaxed">${q.explanation}</p></details>
+        </div>`;
+    });
+    if (list.innerHTML === '') {
+        list.innerHTML = '<p class="text-sm text-slate-400 text-center py-8">No questions match this filter.</p>';
+    }
+}
+
+function filterReview(filter) {
+    document.querySelectorAll('.review-filter').forEach(b => {
+        b.classList.remove('border-cisco-blue','bg-cisco-blue/10','text-cisco-blue','active');
+        b.classList.add('border-slate-200','text-slate-500');
+    });
+    event.target.classList.add('border-cisco-blue','bg-cisco-blue/10','text-cisco-blue','active');
+    event.target.classList.remove('border-slate-200','text-slate-500');
+    buildReviewList(filter);
+}
+
+function retryIncorrect() {
+    const incorrectQs = activeQuestions.filter((q, i) => {
+        const ua = userAnswers[i];
+        return ua !== undefined && !q.options[ua]?.correct;
+    });
+    if (incorrectQs.length === 0) { alert('No incorrect questions to retry!'); return; }
+    // Re-shuffle options
+    activeQuestions = incorrectQs.map(q => {
+        const shuffled = [...q.options];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return { ...q, options: shuffled };
+    });
+    currentIndex = 0;
+    userAnswers = {};
+    flagged = new Set();
+    revealed = new Set();
+    startTime = Date.now();
+    secondsRemaining = 7200;
+
+    document.getElementById('resultsScreen').classList.add('hidden');
+    document.getElementById('examScreen').classList.remove('hidden');
+    document.getElementById('totalQ').textContent = activeQuestions.length;
+    document.getElementById('checkBtn').classList.toggle('hidden', examMode === 'exam');
+    startTimer();
+    renderQuestion();
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+    if (document.getElementById('examScreen').classList.contains('hidden')) return;
+    if (e.key === 'ArrowRight' || e.key === 'n') nextQuestion();
+    else if (e.key === 'ArrowLeft' || e.key === 'p') prevQuestion();
+    else if (e.key === 'f') flagQuestion();
+    else if (e.key === 'c' && examMode === 'practice') checkAnswer();
+    else if (e.key >= '1' && e.key <= '4') selectOption(parseInt(e.key) - 1);
+});
+
+init();
+</script>
+</body>
+</html>
