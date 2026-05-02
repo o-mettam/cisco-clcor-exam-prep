@@ -541,10 +541,10 @@ const questions = [
     id:48, category:"Call Control", subcategory:"CUCM Routing", difficulty:"hard", type:"single",
     question:"A user dials 91-408-555-1234. CUCM has patterns:\n• 9.1[2-9]XX[2-9]XXXXXX\n• 9.1408[2-9]XXXXXX\n• 9.@\nWhich matches first?",
     options:[
-      {text:"9.1408[2-9]XXXXXX — most specific (longest) match", correct:true},
-      {text:"9.@ — catch-all has highest priority", correct:false},
-      {text:"9.1[2-9]XX[2-9]XXXXXX — appears first", correct:false},
-      {text:"All match equally; CUCM uses round-robin", correct:false}
+      {text:"9.1408[2-9]XXXXXX", correct:true},
+      {text:"9.@", correct:false},
+      {text:"9.1[2-9]XX[2-9]XXXXXX", correct:false},
+      {text:"All match equally", correct:false}
     ],
     explanation:"CUCM uses closest/longest match routing. 9.1408... explicitly matches the 408 area code, making it more specific than the general NANP pattern."
   },
@@ -564,7 +564,7 @@ const questions = [
     id:50, category:"Collaboration Apps", subcategory:"Unity Connection", difficulty:"medium", type:"single",
     question:"Which protocol does Cisco Unity Connection primarily use to integrate with CUCM for voicemail?",
     options:[
-      {text:"SIP (SCCP was used in older versions)", correct:true},
+      {text:"SIP", correct:true},
       {text:"SMTP only", correct:false},
       {text:"LDAP for all integration", correct:false},
       {text:"MGCP", correct:false}
@@ -575,7 +575,7 @@ const questions = [
     id:51, category:"Collaboration Apps", subcategory:"IM & Presence", difficulty:"medium", type:"single",
     question:"Which protocol does Cisco IM and Presence Service use for real-time messaging?",
     options:[
-      {text:"XMPP (Extensible Messaging and Presence Protocol)", correct:true},
+      {text:"XMPP", correct:true},
       {text:"SIP SIMPLE", correct:false},
       {text:"SMTP", correct:false},
       {text:"HTTP REST only", correct:false}
@@ -587,7 +587,7 @@ const questions = [
     id:52, category:"QoS", subcategory:"MQC Framework", difficulty:"hard", type:"single",
     question:"What is the correct order of the three MQC components for implementing QoS?",
     options:[
-      {text:"1) class-map (classify), 2) policy-map (define actions), 3) service-policy (apply to interface)", correct:true},
+      {text:"1) class-map, 2) policy-map , 3) service-policy", correct:true},
       {text:"1) policy-map, 2) class-map, 3) service-policy", correct:false},
       {text:"1) service-policy, 2) policy-map, 3) class-map", correct:false},
       {text:"1) class-map, 2) service-policy, 3) policy-map", correct:false}
@@ -655,10 +655,10 @@ const questions = [
     id:58, category:"Protocols", subcategory:"SIP", difficulty:"medium", type:"single",
     question:"What SIP response code indicates the user is busy?",
     options:[
-      {text:"486 Busy Here", correct:true},
-      {text:"480 Temporarily Unavailable", correct:false},
-      {text:"503 Service Unavailable", correct:false},
-      {text:"408 Request Timeout", correct:false}
+      {text:"486", correct:true},
+      {text:"480", correct:false},
+      {text:"503", correct:false},
+      {text:"408", correct:false}
     ],
     explanation:"486 = Busy Here (callee is on another call). 480 = Temporarily Unavailable (not registered). 503 = server error. 408 = timeout."
   },
