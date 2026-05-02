@@ -2,6 +2,8 @@
 
 A browser-based practice exam simulator for the Cisco 350-801 CLCOR (Implementing Cisco Collaboration Core Technologies) v2.0 certification exam.
 
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/K3K51Y7ZT4)
+
 ## Features
 
 - **125 questions** covering all six exam domains with detailed explanations
