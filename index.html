@@ -82,7 +82,7 @@
         <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 p-8">
             <div class="grid grid-cols-2 gap-4 mb-6">
                 <div class="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 text-center">
-                    <div class="text-2xl font-bold text-cisco-dark dark:text-white" id="totalQCount">125</div>
+                    <div class="text-2xl font-bold text-cisco-dark dark:text-white" id="totalQCount">110</div>
                     <div class="text-xs text-slate-500 dark:text-slate-400 mt-1">Total Questions</div>
                 </div>
                 <div class="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 text-center">
@@ -108,11 +108,11 @@
             <div class="mb-6">
                 <h3 class="font-semibold text-cisco-dark dark:text-white mb-3">Number of Questions</h3>
                 <div class="flex gap-2 flex-wrap" id="qCountBtns">
-                    <button onclick="setQuestionCount(10)" class="qcb px-4 py-2 rounded-lg border-2 border-slate-200 dark:border-slate-600 text-sm font-medium hover:border-cisco-blue transition-colors dark:text-slate-300">10</button>
-                    <button onclick="setQuestionCount(25)" class="qcb px-4 py-2 rounded-lg border-2 border-slate-200 dark:border-slate-600 text-sm font-medium hover:border-cisco-blue transition-colors dark:text-slate-300">25</button>
-                    <button onclick="setQuestionCount(50)" class="qcb px-4 py-2 rounded-lg border-2 border-slate-200 dark:border-slate-600 text-sm font-medium hover:border-cisco-blue transition-colors dark:text-slate-300">50</button>
-                    <button onclick="setQuestionCount(75)" class="qcb px-4 py-2 rounded-lg border-2 border-slate-200 dark:border-slate-600 text-sm font-medium hover:border-cisco-blue transition-colors dark:text-slate-300">75</button>
-                    <button onclick="setQuestionCount(110)" class="qcb active px-4 py-2 rounded-lg border-2 border-cisco-blue bg-cisco-blue/10 text-cisco-blue text-sm font-medium">110 (Max)</button>
+                    <button onclick="setQuestionCount(10, event)" class="qcb px-4 py-2 rounded-lg border-2 border-slate-200 dark:border-slate-600 text-sm font-medium hover:border-cisco-blue transition-colors dark:text-slate-300">10</button>
+                    <button onclick="setQuestionCount(25, event)" class="qcb px-4 py-2 rounded-lg border-2 border-slate-200 dark:border-slate-600 text-sm font-medium hover:border-cisco-blue transition-colors dark:text-slate-300">25</button>
+                    <button onclick="setQuestionCount(50, event)" class="qcb px-4 py-2 rounded-lg border-2 border-slate-200 dark:border-slate-600 text-sm font-medium hover:border-cisco-blue transition-colors dark:text-slate-300">50</button>
+                    <button onclick="setQuestionCount(75, event)" class="qcb px-4 py-2 rounded-lg border-2 border-slate-200 dark:border-slate-600 text-sm font-medium hover:border-cisco-blue transition-colors dark:text-slate-300">75</button>
+                    <button onclick="setQuestionCount(110, event)" class="qcb active px-4 py-2 rounded-lg border-2 border-cisco-blue bg-cisco-blue/10 text-cisco-blue text-sm font-medium">110 (Max)</button>
                 </div>
             </div>
             <button onclick="startExam()" id="startBtn" class="w-full bg-cisco-blue hover:bg-cisco-blue/90 text-white font-semibold py-4 rounded-xl transition-colors text-lg shadow-lg shadow-cisco-blue/20">
@@ -270,9 +270,9 @@
         <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 p-8 mb-6">
             <h3 class="font-bold text-cisco-dark dark:text-white mb-4">Review Questions</h3>
             <div class="flex gap-2 mb-4 flex-wrap">
-                <button onclick="filterReview('all')" class="review-filter active px-3 py-1.5 rounded-lg text-xs font-medium border-2 border-cisco-blue bg-cisco-blue/10 text-cisco-blue">All</button>
-                <button onclick="filterReview('incorrect')" class="review-filter px-3 py-1.5 rounded-lg text-xs font-medium border-2 border-slate-200 text-slate-500">Incorrect</button>
-                <button onclick="filterReview('flagged')" class="review-filter px-3 py-1.5 rounded-lg text-xs font-medium border-2 border-slate-200 text-slate-500">Flagged</button>
+                <button onclick="filterReview('all', event)" class="review-filter active px-3 py-1.5 rounded-lg text-xs font-medium border-2 border-cisco-blue bg-cisco-blue/10 text-cisco-blue">All</button>
+                <button onclick="filterReview('incorrect', event)" class="review-filter px-3 py-1.5 rounded-lg text-xs font-medium border-2 border-slate-200 text-slate-500">Incorrect</button>
+                <button onclick="filterReview('flagged', event)" class="review-filter px-3 py-1.5 rounded-lg text-xs font-medium border-2 border-slate-200 text-slate-500">Flagged</button>
             </div>
             <div id="reviewList" class="space-y-4 max-h-[600px] overflow-y-auto pr-2"></div>
         </div>
@@ -340,7 +340,8 @@ function saveProgress() {
         currentIndex, userAnswers: {},
         flagged: [...flagged],
         revealed: [...revealed],
-        examMode, startTime, secondsRemaining
+        examMode, startTime, secondsRemaining,
+        lastSaveTime: Date.now()
     };
     // Convert Set answers to arrays for JSON
     Object.entries(userAnswers).forEach(([k, v]) => {
@@ -367,8 +368,15 @@ function resumeExam() {
     flagged = new Set(saved.flagged);
     revealed = new Set(saved.revealed);
     examMode = saved.examMode;
-    startTime = saved.startTime;
-    secondsRemaining = saved.secondsRemaining;
+    // Adjust for time elapsed while browser was closed
+    const offlineDelta = saved.lastSaveTime ? Math.floor((Date.now() - saved.lastSaveTime) / 1000) : 0;
+    if (examMode === 'exam') {
+        secondsRemaining = Math.max(0, saved.secondsRemaining - offlineDelta);
+    } else {
+        // Shift startTime forward to exclude offline time from elapsed display
+        startTime = saved.startTime + (offlineDelta * 1000);
+        secondsRemaining = saved.secondsRemaining;
+    }
     // Restore answers (handle multi-select Sets)
     userAnswers = {};
     Object.entries(saved.userAnswers).forEach(([k, v]) => {
@@ -499,14 +507,14 @@ function updateAvailableCount() {
     document.getElementById('totalQCount').textContent = display;
 }
 
-function setQuestionCount(n) {
+function setQuestionCount(n, e) {
     questionLimit = n;
     document.querySelectorAll('.qcb').forEach(b => {
         b.classList.remove('border-cisco-blue','bg-cisco-blue/10','text-cisco-blue');
         b.classList.add('border-slate-200','dark:border-slate-600');
     });
-    event.target.classList.add('border-cisco-blue','bg-cisco-blue/10','text-cisco-blue');
-    event.target.classList.remove('border-slate-200','dark:border-slate-600');
+    e.target.classList.add('border-cisco-blue','bg-cisco-blue/10','text-cisco-blue');
+    e.target.classList.remove('border-slate-200','dark:border-slate-600');
     updateAvailableCount();
 }
 
@@ -622,7 +630,7 @@ function renderQuestion() {
             : `<span>${escapeHtml(opt.text)}</span>`;
         const indicator = isMulti
             ? `<span class="flex-shrink-0 w-7 h-7 rounded border-2 ${stateClass.includes('correct') ? 'border-cisco-green bg-cisco-green text-white' : stateClass.includes('incorrect') ? 'border-cisco-red bg-cisco-red text-white' : isSelected ? 'border-cisco-blue bg-cisco-blue text-white' : 'border-slate-300 dark:border-slate-500 text-slate-400'} flex items-center justify-center text-xs font-bold">${isRevealed && opt.correct ? '✓' : isRevealed && isSelected && !opt.correct ? '✗' : isSelected ? '✓' : letter}</span>`
-            : `<span class="flex-shrink-0 w-7 h-7 rounded-full border-2 ${stateClass === 'correct' ? 'border-cisco-green bg-cisco-green text-white' : stateClass.includes('incorrect') ? 'border-cisco-red bg-cisco-red text-white' : isSelected ? 'border-cisco-blue bg-cisco-blue text-white' : 'border-slate-300 dark:border-slate-500 text-slate-400'} flex items-center justify-center text-xs font-bold">${isRevealed && opt.correct ? '✓' : isRevealed && isSelected && !opt.correct ? '✗' : letter}</span>`;
+            : `<span class="flex-shrink-0 w-7 h-7 rounded-full border-2 ${stateClass.includes('correct') ? 'border-cisco-green bg-cisco-green text-white' : stateClass.includes('incorrect') ? 'border-cisco-red bg-cisco-red text-white' : isSelected ? 'border-cisco-blue bg-cisco-blue text-white' : 'border-slate-300 dark:border-slate-500 text-slate-400'} flex items-center justify-center text-xs font-bold">${isRevealed && opt.correct ? '✓' : isRevealed && isSelected && !opt.correct ? '✗' : letter}</span>`;
         html += `<div class="option-btn flex items-start gap-3 p-4 rounded-xl border-2 border-slate-200 dark:border-slate-600 ${stateClass}" onclick="selectOption(${i})">
             ${indicator}
             <div class="flex-1 text-sm text-slate-700 dark:text-slate-300">${optText}</div>
@@ -915,13 +923,13 @@ function buildReviewList(filter) {
     }
 }
 
-function filterReview(filter) {
+function filterReview(filter, e) {
     document.querySelectorAll('.review-filter').forEach(b => {
         b.classList.remove('border-cisco-blue','bg-cisco-blue/10','text-cisco-blue','active');
         b.classList.add('border-slate-200','text-slate-500');
     });
-    event.target.classList.add('border-cisco-blue','bg-cisco-blue/10','text-cisco-blue','active');
-    event.target.classList.remove('border-slate-200','text-slate-500');
+    e.target.classList.add('border-cisco-blue','bg-cisco-blue/10','text-cisco-blue','active');
+    e.target.classList.remove('border-slate-200','text-slate-500');
     buildReviewList(filter);
 }
 
@@ -968,7 +976,7 @@ document.addEventListener('keydown', (e) => {
     else if ((e.key === 'ArrowLeft' || e.key === 'p') && examMode !== 'exam') prevQuestion();
     else if (e.key === 'f') flagQuestion();
     else if (e.key === 'c' && examMode === 'practice') checkAnswer();
-    else if (e.key >= '1' && e.key <= '4') selectOption(parseInt(e.key) - 1);
+    else if (e.key >= '1' && e.key <= '5') selectOption(parseInt(e.key) - 1);
 });
 
 init();
