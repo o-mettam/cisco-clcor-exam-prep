@@ -740,5 +740,679 @@ const questions = [
       {text:"Hierarchical policies are not supported on IOS-XE", correct:false}
     ],
     explanation:"Hierarchical QoS (H-QoS) uses a parent policy to shape to the contracted rate (e.g., provider CIR) and a child policy for per-class queuing (LLQ, CBWFQ, WRED) within that shaped bandwidth. This is common on WAN interfaces where the physical rate exceeds the contracted rate."
+  },
+  // ========== Additional QoS Questions ==========
+  {
+    id:66, category:"QoS", subcategory:"Classification & Marking", difficulty:"medium", type:"single",
+    question:"What is the decimal DSCP value for CS3?",
+    options:[
+      {text:"24", correct:true},
+      {text:"26", correct:false},
+      {text:"18", correct:false},
+      {text:"48", correct:false}
+    ],
+    explanation:"Class Selector (CS) values are multiples of 8. CS3 = 3 × 8 = 24. AF31 = 26, AF21 = 18, CS6 = 48."
+  },
+  {
+    id:67, category:"QoS", subcategory:"Classification & Marking", difficulty:"hard", type:"single",
+    question:"Which command on a Catalyst switch port trusts DSCP markings from a connected device?",
+    options:[
+      {text:"mls qos trust dscp", correct:true},
+      {text:"qos trust dscp", correct:false},
+      {text:"trust dscp enable", correct:false},
+      {text:"switchport qos trust dscp", correct:false}
+    ],
+    explanation:"On older Catalyst platforms (3560/3750), <code>mls qos trust dscp</code> under the interface trusts incoming DSCP. On newer Catalyst 9000, <code>trust device cisco-phone</code> combined with policies is used."
+  },
+  {
+    id:68, category:"QoS", subcategory:"Policing & Shaping", difficulty:"hard", type:"single",
+    question:"What is the effect of <code>police cir 1000000 bc 31250 conform-action transmit exceed-action drop</code>?",
+    options:[
+      {text:"Polices traffic to 1 Mbps CIR with a 31250 byte burst; conforming traffic is forwarded, exceeding traffic is dropped", correct:true},
+      {text:"Shapes traffic to 1 Mbps with 31250 byte buffer", correct:false},
+      {text:"Drops all traffic over 31250 bytes per second", correct:false},
+      {text:"Sets a 1 Mbps minimum bandwidth guarantee", correct:false}
+    ],
+    explanation:"<code>police cir</code> configures a single-rate policer. CIR = 1 Mbps, Bc (committed burst) = 31250 bytes. Conform-action transmit = forward conforming traffic. Exceed-action drop = drop excess. This is policing, not shaping (no buffering)."
+  },
+  {
+    id:69, category:"QoS", subcategory:"Policing & Shaping", difficulty:"medium", type:"single",
+    question:"Which QoS mechanism smooths traffic bursts by buffering excess packets and sending them at a controlled rate?",
+    options:[
+      {text:"Traffic shaping", correct:true},
+      {text:"Traffic policing", correct:false},
+      {text:"WRED", correct:false},
+      {text:"Classification", correct:false}
+    ],
+    explanation:"Shaping buffers excess traffic and sends it at a regulated rate, smoothing bursts. Policing drops or remarks without buffering. WRED is a congestion avoidance mechanism."
+  },
+  {
+    id:70, category:"QoS", subcategory:"Voice/Video QoS", difficulty:"medium", type:"single",
+    question:"What is the maximum acceptable packet loss for voice traffic per Cisco recommendations?",
+    options:[
+      {text:"1%", correct:true},
+      {text:"5%", correct:false},
+      {text:"0.1%", correct:false},
+      {text:"3%", correct:false}
+    ],
+    explanation:"Cisco voice quality targets: max 1% packet loss, 150ms one-way delay, 30ms jitter per ITU-T G.114 recommendations."
+  },
+  {
+    id:71, category:"QoS", subcategory:"Voice/Video QoS", difficulty:"hard", type:"single",
+    question:"How much bandwidth should be reserved for the LLQ priority queue according to Cisco best practices?",
+    options:[
+      {text:"No more than 33% of link bandwidth", correct:true},
+      {text:"Exactly 50% of link bandwidth", correct:false},
+      {text:"At least 75% of link bandwidth", correct:false},
+      {text:"No specific recommendation exists", correct:false}
+    ],
+    explanation:"Cisco recommends limiting total priority queue allocation to 33% of link bandwidth. Exceeding this can starve other traffic classes during congestion."
+  },
+  {
+    id:72, category:"QoS", subcategory:"MQC Framework", difficulty:"hard", type:"single",
+    question:"What does WRED (Weighted Random Early Detection) do and why is it unsuitable for voice traffic?",
+    options:[
+      {text:"It randomly drops TCP packets before queue overflow to signal TCP senders to slow down; voice uses UDP and cannot respond to drops", correct:true},
+      {text:"It prioritizes voice traffic above all others; it is actually recommended for voice", correct:false},
+      {text:"It encrypts traffic based on weight values; voice does not need encryption", correct:false},
+      {text:"It buffers all traffic equally; voice needs priority queuing instead", correct:false}
+    ],
+    explanation:"WRED is a congestion avoidance mechanism that selectively drops TCP packets based on DSCP/IP Precedence before queue overflow, triggering TCP slow-start. Voice/video use UDP which cannot respond to drops, so WRED should only be applied to data classes."
+  },
+  {
+    id:73, category:"QoS", subcategory:"Classification & Marking", difficulty:"medium", type:"single",
+    question:"What DSCP value does Cisco recommend for voice signaling (SIP/SCCP)?",
+    options:[
+      {text:"CS3 (24) or AF31 (26)", correct:true},
+      {text:"EF (46)", correct:false},
+      {text:"AF41 (34)", correct:false},
+      {text:"CS1 (8)", correct:false}
+    ],
+    explanation:"Cisco QoS baseline recommends CS3 (DSCP 24) for call signaling. AF31 is also acceptable. EF is reserved for voice media (RTP). AF41 is for interactive video."
+  },
+  {
+    id:74, category:"QoS", subcategory:"Classification & Marking", difficulty:"easy", type:"single",
+    question:"How many bits is the DSCP field in the IP header?",
+    options:[
+      {text:"6 bits", correct:true},
+      {text:"3 bits", correct:false},
+      {text:"8 bits", correct:false},
+      {text:"4 bits", correct:false}
+    ],
+    explanation:"DSCP uses the first 6 bits of the 8-bit ToS (Type of Service) byte, providing 64 possible values (0-63). The remaining 2 bits are ECN (Explicit Congestion Notification)."
+  },
+  {
+    id:75, category:"QoS", subcategory:"MQC Framework", difficulty:"hard", type:"single",
+    question:"What happens to traffic that does not match any user-defined class-map in a policy-map?",
+    options:[
+      {text:"It is placed in class-default, which matches all remaining traffic", correct:true},
+      {text:"It is dropped immediately", correct:false},
+      {text:"It is forwarded without any QoS treatment", correct:false},
+      {text:"The policy-map is not applied to that traffic", correct:false}
+    ],
+    explanation:"<code>class-default</code> is an implicit catch-all class that matches all traffic not matched by other classes. It always exists in every policy-map even if not explicitly configured."
+  },
+  // ========== Additional CUBE Questions ==========
+  {
+    id:76, category:"CUBE", subcategory:"Dial Peers", difficulty:"hard", type:"single",
+    question:"What is a Dial-Peer Group (DPG) and how is it used on CUBE?",
+    options:[
+      {text:"A group of outbound dial-peers referenced from an inbound dial-peer, bypassing traditional destination-pattern matching for outbound selection", correct:true},
+      {text:"A group of inbound dial-peers that share the same incoming called-number", correct:false},
+      {text:"A failover group for redundant CUCM subscribers", correct:false},
+      {text:"A set of dial-peers sharing the same codec profile", correct:false}
+    ],
+    explanation:"<code>voice class dpg</code> groups outbound dial-peers. When applied to an inbound dial-peer with <code>destination dpg</code>, calls matched inbound are routed directly to the DPG members, bypassing normal outbound dial-peer hunting."
+  },
+  {
+    id:77, category:"CUBE", subcategory:"Dial Peers", difficulty:"hard", type:"single",
+    question:"What does this configuration accomplish?",
+    cli_context:"voice class dpg 100\n dial-peer 200\n dial-peer 201\n\ndial-peer voice 10 voip\n description ** Inbound from ITSP **\n incoming called-number .+\n destination dpg 100",
+    options:[
+      {text:"All inbound calls from the ITSP are routed to dial-peers 200 and 201 via DPG, bypassing destination-pattern matching", correct:true},
+      {text:"Calls are load-balanced between dial-peers 10 and 100", correct:false},
+      {text:"Dial-peer 10 sends calls to the ITSP using dial-peers 200 and 201 as backup", correct:false},
+      {text:"All outbound calls to the ITSP use dial-peer group 100", correct:false}
+    ],
+    explanation:"DPG 100 contains outbound peers 200/201. Inbound peer 10 matches all ITSP calls (<code>incoming called-number .+</code>) and routes them to DPG 100 instead of using traditional destination-pattern matching."
+  },
+  {
+    id:78, category:"CUBE", subcategory:"Basic Configuration", difficulty:"hard", type:"single",
+    question:"What is a voice class server-group on CUBE?",
+    options:[
+      {text:"A list of destination SIP server addresses assigned to a dial-peer, providing failover and load distribution with a hunt scheme", correct:true},
+      {text:"A group of CUCM servers for phone registration", correct:false},
+      {text:"A cluster of CUBE routers for high availability", correct:false},
+      {text:"A set of DNS servers for SIP URI resolution", correct:false}
+    ],
+    explanation:"<code>voice class server-group</code> defines multiple SIP target addresses with hunt order (round-robin, preference, etc.). Applied to a dial-peer with <code>session server-group</code>, it replaces <code>session target</code> for multi-destination scenarios."
+  },
+  {
+    id:79, category:"CUBE", subcategory:"Basic Configuration", difficulty:"medium", type:"single",
+    question:"Which command configures CUBE to register with an ITSP SIP registrar?",
+    options:[
+      {text:"voice class sip-options-keepalive is NOT registration; you need voice class tenant with registrar and credentials commands", correct:false},
+      {text:"sip-ua\n  registrar ipv4:203.0.113.1 expires 3600\n  credentials username user password pass realm itsp.com", correct:true},
+      {text:"voice service voip\n  register 203.0.113.1", correct:false},
+      {text:"dial-peer voice 100 voip\n  register-with itsp.com", correct:false}
+    ],
+    explanation:"SIP registration is configured under <code>sip-ua</code> mode using <code>registrar</code> (server address and expiry) and <code>credentials</code> (username/password/realm)."
+  },
+  {
+    id:80, category:"CUBE", subcategory:"Translation Rules", difficulty:"hard", type:"single",
+    question:"What does the IOS regex character <code>\\(</code> and <code>\\)</code> do in a voice translation rule?",
+    options:[
+      {text:"They define a capture group — digits matched inside are stored and referenced as \\1, \\2, etc. in the replacement string", correct:true},
+      {text:"They match literal parentheses in the phone number", correct:false},
+      {text:"They mark optional digits in the pattern", correct:false},
+      {text:"They define character classes like [0-9]", correct:false}
+    ],
+    explanation:"In IOS voice translation rules, <code>\\(</code> and <code>\\)</code> create capture groups. Matched content is referenced with <code>\\1</code>, <code>\\2</code>, etc. in the replacement pattern. This is different from standard regex where unescaped ( ) capture."
+  },
+  {
+    id:81, category:"CUBE", subcategory:"Translation Rules", difficulty:"hard", type:"single",
+    question:"You need to add the E.164 prefix +1 to all 10-digit calling numbers on inbound calls. Where do you apply the translation profile?",
+    options:[
+      {text:"Under the inbound dial-peer: translate calling <profile-tag> (incoming leg)", correct:true},
+      {text:"Under voice service voip globally", correct:false},
+      {text:"Under the outbound dial-peer: translate called <profile-tag>", correct:false},
+      {text:"Under the POTS dial-peer port command", correct:false}
+    ],
+    explanation:"To modify the calling number on inbound calls, apply the translation profile to the inbound VoIP dial-peer with <code>translate calling</code>. This modifies the calling (ANI) number before further processing."
+  },
+  {
+    id:82, category:"CUBE", subcategory:"Security", difficulty:"hard", type:"single",
+    question:"What is the relationship between SRTP on CUBE and the SDP offer/answer?",
+    options:[
+      {text:"When SRTP is enabled, CUBE includes crypto attributes in SDP; both sides must agree on cipher suite (e.g., AES_CM_128) via SDP negotiation", correct:true},
+      {text:"SRTP is negotiated via SIP headers, not SDP", correct:false},
+      {text:"SRTP requires pre-shared keys configured on both endpoints, no SDP negotiation needed", correct:false},
+      {text:"SRTP only works with H.323, not SIP", correct:false}
+    ],
+    explanation:"SRTP negotiation uses the <code>a=crypto:</code> line in SDP. CUBE with <code>srtp</code> enabled adds crypto attributes to the SDP offer. The remote side must respond with a matching crypto line in the SDP answer."
+  },
+  {
+    id:83, category:"CUBE", subcategory:"Troubleshooting", difficulty:"medium", type:"single",
+    question:"A SIP call fails with <code>403 Forbidden</code>. What is the most likely cause?",
+    options:[
+      {text:"The request was rejected due to policy — the server understood the request but refuses to authorize it", correct:true},
+      {text:"The destination number was not found", correct:false},
+      {text:"A codec mismatch occurred", correct:false},
+      {text:"The SIP INVITE timed out", correct:false}
+    ],
+    explanation:"SIP 403 = Forbidden — the server understood the request but refuses to fulfill it (policy, ACL, or authorization issue). 404 = Not Found, 488 = codec mismatch, 408 = timeout."
+  },
+  {
+    id:84, category:"CUBE", subcategory:"Troubleshooting", difficulty:"hard", type:"single",
+    question:"Which command shows the inbound and outbound dial-peers matched for an active call on CUBE?",
+    options:[
+      {text:"show voip rtp connections (for media) and show call active voice brief (for dial-peer details)", correct:true},
+      {text:"show sip-ua status", correct:false},
+      {text:"debug cube all", correct:false},
+      {text:"show voice class dpg summary", correct:false}
+    ],
+    explanation:"<code>show call active voice brief</code> shows active calls with matched inbound/outbound dial-peer tags, codec, duration, and endpoints. <code>show voip rtp connections</code> shows active RTP streams."
+  },
+  {
+    id:85, category:"CUBE", subcategory:"Media & Codecs", difficulty:"medium", type:"single",
+    question:"What is the bandwidth of G.729 codec without header overhead?",
+    options:[
+      {text:"8 kbps", correct:true},
+      {text:"64 kbps", correct:false},
+      {text:"32 kbps", correct:false},
+      {text:"16 kbps", correct:false}
+    ],
+    explanation:"G.729 compresses voice to 8 kbps (vs G.711 at 64 kbps). With IP/UDP/RTP headers, actual bandwidth is ~26-31 kbps depending on packet size."
+  },
+  {
+    id:86, category:"CUBE", subcategory:"Media & Codecs", difficulty:"medium", type:"single",
+    question:"What does <code>media flow-through</code> mean on CUBE?",
+    options:[
+      {text:"Both SIP signaling AND RTP media pass through CUBE — CUBE is in the media path", correct:true},
+      {text:"Only signaling passes through CUBE; media goes directly between endpoints", correct:false},
+      {text:"Media is transcoded on CUBE before forwarding", correct:false},
+      {text:"Media is encrypted end-to-end through CUBE", correct:false}
+    ],
+    explanation:"<code>media flow-through</code> is the default CUBE behavior. Both signaling and media pass through CUBE, allowing features like recording, transcoding, DTMF interworking, and SRTP-to-RTP conversion."
+  },
+  // ========== Additional Protocol Questions ==========
+  {
+    id:87, category:"Protocols", subcategory:"SIP", difficulty:"medium", type:"single",
+    question:"What is the purpose of SIP REGISTER?",
+    options:[
+      {text:"To bind a user's SIP URI (AOR) to a current contact address (IP:port) so the registrar knows where to route calls", correct:true},
+      {text:"To initiate a phone call to a registered user", correct:false},
+      {text:"To transfer an active call to another user", correct:false},
+      {text:"To subscribe to presence notifications", correct:false}
+    ],
+    explanation:"SIP REGISTER creates a binding between the user's Address of Record (AOR, e.g., sip:user@domain.com) and the device's contact address (IP:port). This allows the registrar/proxy to route incoming calls to the correct device."
+  },
+  {
+    id:88, category:"Protocols", subcategory:"SIP", difficulty:"hard", type:"single",
+    question:"In a SIP INVITE, what do the 'Via' headers indicate?",
+    options:[
+      {text:"The path the request has traveled through SIP proxies, used for routing responses back along the same path", correct:true},
+      {text:"The supported codecs for the call", correct:false},
+      {text:"The authentication credentials of the caller", correct:false},
+      {text:"The priority level of the call", correct:false}
+    ],
+    explanation:"Each SIP proxy that forwards a request adds a Via header with its address. Responses are routed back through the same proxies by following the Via headers in reverse order."
+  },
+  {
+    id:89, category:"Protocols", subcategory:"SIP", difficulty:"medium", type:"single",
+    question:"What SIP method is used to send mid-call information like DTMF digits (when using SIP INFO method)?",
+    options:[
+      {text:"INFO", correct:true},
+      {text:"NOTIFY", correct:false},
+      {text:"UPDATE", correct:false},
+      {text:"MESSAGE", correct:false}
+    ],
+    explanation:"SIP INFO carries application-level information during a session, including DTMF digits. NOTIFY is for event subscriptions. UPDATE modifies session parameters. MESSAGE is for instant messaging."
+  },
+  {
+    id:90, category:"Protocols", subcategory:"SIP", difficulty:"hard", type:"single",
+    question:"What is an SDP offer/answer model?",
+    options:[
+      {text:"The caller includes media capabilities in the SDP offer (INVITE body); the callee responds with selected capabilities in the SDP answer (200 OK body)", correct:true},
+      {text:"Both sides simultaneously send SDP and the server picks the best match", correct:false},
+      {text:"SDP is only sent by the callee to describe its capabilities", correct:false},
+      {text:"SDP negotiation happens in a separate TCP connection after the call is established", correct:false}
+    ],
+    explanation:"Per RFC 3264, the offerer (typically in INVITE) lists all supported codecs/media. The answerer (in 200 OK or 183) selects compatible options. This establishes the media session parameters for RTP."
+  },
+  {
+    id:91, category:"Protocols", subcategory:"Codecs", difficulty:"medium", type:"single",
+    question:"Which codec provides the best voice quality but uses the most bandwidth?",
+    options:[
+      {text:"G.711 (64 kbps)", correct:true},
+      {text:"G.729 (8 kbps)", correct:false},
+      {text:"G.722 (48-64 kbps)", correct:false},
+      {text:"iLBC (13.3/15.2 kbps)", correct:false}
+    ],
+    explanation:"G.711 (a-law/u-law) is uncompressed PCM at 64 kbps, providing the best quality (MOS ~4.4). G.722 is wideband at similar bandwidth but for HD voice. G.729 compresses to 8 kbps with good quality (MOS ~3.9)."
+  },
+  {
+    id:92, category:"Protocols", subcategory:"Codecs", difficulty:"easy", type:"single",
+    question:"What does the RTP protocol provide?",
+    options:[
+      {text:"End-to-end delivery of real-time audio/video data with timestamps, sequence numbers, and payload identification", correct:true},
+      {text:"Reliable TCP-based delivery of voice packets with retransmission", correct:false},
+      {text:"Call setup and teardown signaling", correct:false},
+      {text:"Encryption of media streams", correct:false}
+    ],
+    explanation:"RTP (RFC 3550) runs over UDP and provides timestamps (for synchronization), sequence numbers (for reorder detection), and payload type identification. It does NOT guarantee delivery or provide encryption (that's SRTP)."
+  },
+  // ========== Additional Infrastructure & Design ==========
+  {
+    id:93, category:"Infrastructure", subcategory:"Design", difficulty:"medium", type:"single",
+    question:"What is the difference between Expressway-C and Expressway-E?",
+    options:[
+      {text:"Expressway-C is inside the firewall (connects to CUCM); Expressway-E is in the DMZ (faces the internet) — together they provide firewall traversal", correct:true},
+      {text:"Expressway-C handles video; Expressway-E handles voice", correct:false},
+      {text:"Expressway-C is the primary; Expressway-E is the backup", correct:false},
+      {text:"They are the same product with different licenses", correct:false}
+    ],
+    explanation:"Expressway-C (Core) sits inside the network, communicating with CUCM/IM&P. Expressway-E (Edge) sits in the DMZ, facing external networks. They maintain a traversal zone between them for secure firewall traversal without opening inbound ports."
+  },
+  {
+    id:94, category:"Infrastructure", subcategory:"Design", difficulty:"hard", type:"single",
+    question:"What is Mobile and Remote Access (MRA) in Cisco Collaboration?",
+    options:[
+      {text:"A solution allowing Jabber/Webex clients to register with on-premises CUCM from outside the enterprise network without VPN, using Expressway", correct:true},
+      {text:"A VPN solution built into Cisco IP phones", correct:false},
+      {text:"A mobile app that replaces CUCM for remote users", correct:false},
+      {text:"A cellular network integration for voice failover", correct:false}
+    ],
+    explanation:"MRA uses Expressway-C/E pair to provide VPN-less access to CUCM services (registration, calling, voicemail, IM/presence, directory) for Jabber and Webex clients outside the corporate network."
+  },
+  {
+    id:95, category:"Infrastructure", subcategory:"Design", difficulty:"medium", type:"single",
+    question:"What is a CUCM cluster?",
+    options:[
+      {text:"A group of CUCM servers (Publisher and Subscribers) sharing a replicated database, providing scalability and redundancy", correct:true},
+      {text:"A single CUCM server with multiple virtual machines", correct:false},
+      {text:"A group of gateways registered to the same CUCM", correct:false},
+      {text:"A collection of IP phone device pools", correct:false}
+    ],
+    explanation:"A CUCM cluster has one Publisher (read-write database) and up to 11 Subscribers (read-only replicas). Phones register to Subscribers. The Publisher handles DB writes and replication."
+  },
+  {
+    id:96, category:"Infrastructure", subcategory:"Design", difficulty:"medium", type:"single",
+    question:"What is the maximum number of CUCM nodes (servers) in a single cluster?",
+    options:[
+      {text:"12 (1 Publisher + up to 11 Subscribers)", correct:false},
+      {text:"21 (1 Publisher + up to 20 Subscribers/specialized servers)", correct:true},
+      {text:"4 (1 Publisher + 3 Subscribers)", correct:false},
+      {text:"Unlimited", correct:false}
+    ],
+    explanation:"A CUCM cluster supports up to 21 nodes: 1 Publisher, and up to 20 additional servers (Subscribers, TFTP, media resource servers). The older limit was 12, but current versions support up to 21."
+  },
+  // ========== Additional Call Control ==========
+  {
+    id:97, category:"Call Control", subcategory:"CUCM Routing", difficulty:"medium", type:"single",
+    question:"What is a Route Group in CUCM?",
+    options:[
+      {text:"An ordered list of gateways/trunks that CUCM uses to route calls, providing failover if the first device is unavailable", correct:true},
+      {text:"A group of route patterns sharing the same partition", correct:false},
+      {text:"A set of phones that can receive group calls", correct:false},
+      {text:"A collection of dial rules for digit manipulation", correct:false}
+    ],
+    explanation:"A Route Group contains one or more gateways or SIP trunks in a prioritized list. CUCM tries the first device; if unavailable, it tries the next. Route Groups are referenced by Route Lists."
+  },
+  {
+    id:98, category:"Call Control", subcategory:"CUCM Routing", difficulty:"medium", type:"single",
+    question:"What is a Route List in CUCM and how does it relate to Route Groups?",
+    options:[
+      {text:"A Route List is an ordered collection of Route Groups; Route Patterns point to Route Lists, which contain Route Groups, which contain gateways/trunks", correct:true},
+      {text:"A Route List is the same as a Route Group", correct:false},
+      {text:"A Route List contains Route Patterns organized by priority", correct:false},
+      {text:"A Route List is a list of dialed digit patterns", correct:false}
+    ],
+    explanation:"The routing hierarchy is: Route Pattern → Route List → Route Group → Gateway/Trunk. This three-tier architecture provides flexible failover and load distribution for call routing."
+  },
+  {
+    id:99, category:"Call Control", subcategory:"CUCM Routing", difficulty:"hard", type:"single",
+    question:"In CUCM, what does the '!' wildcard do in a route pattern?",
+    options:[
+      {text:"Matches one or more digits (equivalent to .+ in regex) — routes immediately without waiting for more digits", correct:true},
+      {text:"Matches exactly one digit", correct:false},
+      {text:"Matches zero or more digits", correct:false},
+      {text:"Blocks the matched pattern", correct:false}
+    ],
+    explanation:"The '!' wildcard matches one or more digits and triggers immediate routing without inter-digit timeout. This is different from 'X' (single digit) and '@' (NANP pattern). Example: 9.! routes all calls starting with 9."
+  },
+  {
+    id:100, category:"Call Control", subcategory:"CUCM Routing", difficulty:"medium", type:"single",
+    question:"What is a Device Pool in CUCM?",
+    options:[
+      {text:"A collection of common settings (region, date/time group, SRST reference, calling search space) applied to multiple devices for simplified administration", correct:true},
+      {text:"A pool of available IP addresses for phones", correct:false},
+      {text:"A group of phones that share a single directory number", correct:false},
+      {text:"A set of DSP resources allocated to a gateway", correct:false}
+    ],
+    explanation:"Device Pools provide a template of common parameters (region, location, SRST reference, date/time, softkey template, media resource group list) applied to phones, gateways, and trunks."
+  },
+  // ========== Additional Collaboration Applications ==========
+  {
+    id:101, category:"Collaboration Apps", subcategory:"Unity Connection", difficulty:"medium", type:"single",
+    question:"What is the purpose of a Voice Mail Pilot and Voice Mail Profile in CUCM?",
+    options:[
+      {text:"The Pilot is the DN that calls are forwarded to for voicemail; the Profile links the Pilot to specific phones/line groups for proper voicemail access", correct:true},
+      {text:"The Pilot records greetings; the Profile stores messages", correct:false},
+      {text:"The Pilot is the MWI number; the Profile is the PIN policy", correct:false},
+      {text:"They are the same thing with different names", correct:false}
+    ],
+    explanation:"Voice Mail Pilot = the directory number of Unity Connection (e.g., 9000). Voice Mail Profile = associates the Pilot with devices. When a user presses the messages button or a CFNA triggers, the call goes to the Pilot DN."
+  },
+  {
+    id:102, category:"Collaboration Apps", subcategory:"IM & Presence", difficulty:"medium", type:"single",
+    question:"What presence states are available in Cisco IM&P?",
+    options:[
+      {text:"Available, Busy, Away, Do Not Disturb, Offline — aggregated from multiple sources (phone state, calendar, manual)", correct:true},
+      {text:"Online and Offline only", correct:false},
+      {text:"Active and Inactive only", correct:false},
+      {text:"Available, Ringing, and Busy only", correct:false}
+    ],
+    explanation:"IM&P aggregates presence from multiple sources: CUCM phone state, calendar (Exchange/O365), manual user input, and client activity. The most restrictive state wins in aggregation."
+  },
+  {
+    id:103, category:"Collaboration Apps", subcategory:"Webex", difficulty:"medium", type:"single",
+    question:"What is Cisco Webex Calling?",
+    options:[
+      {text:"A cloud-based enterprise phone system (UCaaS) that replaces or supplements on-premises CUCM with cloud call control", correct:true},
+      {text:"A video conferencing-only platform", correct:false},
+      {text:"A SIP trunking service for PSTN connectivity", correct:false},
+      {text:"A VPN client for remote Jabber users", correct:false}
+    ],
+    explanation:"Webex Calling is Cisco's cloud UCaaS platform providing PBX functionality (call control, voicemail, auto-attendant, hunt groups) from the cloud. It can work standalone or in hybrid with on-premises CUCM."
+  },
+  {
+    id:104, category:"Collaboration Apps", subcategory:"Webex", difficulty:"medium", type:"single",
+    question:"What is a Local Gateway in Webex Calling?",
+    options:[
+      {text:"A CUBE or IOS-XE router that connects Webex Calling to on-premises PSTN or existing PBX infrastructure", correct:true},
+      {text:"A switch that provides PoE to IP phones", correct:false},
+      {text:"A cloud-based SIP proxy", correct:false},
+      {text:"A DNS server for Webex domain resolution", correct:false}
+    ],
+    explanation:"A Local Gateway (typically CUBE on ISR/CSR) connects Webex Calling to local PSTN trunks (SIP/PRI) or existing on-premises PBX systems, enabling hybrid deployments and local PSTN breakout."
+  },
+  // ========== Additional IOS XE Gateway ==========
+  {
+    id:105, category:"IOS XE Gateway", subcategory:"Gateway Config", difficulty:"hard", type:"single",
+    question:"What is the purpose of <code>voice register global</code> on an IOS-XE gateway?",
+    options:[
+      {text:"Enables SIP phone registration on the gateway (for CME or SIP SRST), defining max-dn, max-pool, and source address", correct:true},
+      {text:"Registers the gateway with CUCM as a MGCP gateway", correct:false},
+      {text:"Configures global dial-peer settings", correct:false},
+      {text:"Enables QoS for voice globally", correct:false}
+    ],
+    explanation:"<code>voice register global</code> enables SIP registrar functionality on the gateway. <code>max-dn</code> sets maximum directory numbers, <code>max-pool</code> sets maximum phones, and <code>source-address</code> defines the gateway's registration IP."
+  },
+  {
+    id:106, category:"IOS XE Gateway", subcategory:"Gateway Config", difficulty:"medium", type:"single",
+    question:"What is the difference between an FXS and FXO voice port?",
+    options:[
+      {text:"FXS provides dial tone to a phone/fax (station side); FXO receives dial tone from the PSTN/PBX (office side)", correct:true},
+      {text:"FXS is for SIP; FXO is for H.323", correct:false},
+      {text:"FXS is digital; FXO is analog", correct:false},
+      {text:"FXS is inbound only; FXO is outbound only", correct:false}
+    ],
+    explanation:"FXS (Foreign Exchange Station) provides power, ring voltage, and dial tone — connects to phones. FXO (Foreign Exchange Office) connects to the CO/PBX, receiving dial tone. A router's FXS port connects to an analog phone; its FXO port connects to the PSTN."
+  },
+  {
+    id:107, category:"IOS XE Gateway", subcategory:"Gateway Config", difficulty:"hard", type:"single",
+    question:"What does <code>isdn switch-type primary-ni</code> configure?",
+    options:[
+      {text:"Sets the ISDN switch type to National ISDN for a T1 PRI interface in North America", correct:true},
+      {text:"Enables ISDN BRI on the interface", correct:false},
+      {text:"Configures the gateway as a network switch", correct:false},
+      {text:"Sets the SIP transport to TCP", correct:false}
+    ],
+    explanation:"<code>isdn switch-type primary-ni</code> configures the PRI to use National ISDN protocol. Other common types: <code>primary-4ess</code> (AT&T), <code>primary-5ess</code> (Lucent), <code>primary-net5</code> (Euro ISDN)."
+  },
+  {
+    id:108, category:"IOS XE Gateway", subcategory:"Media Resources", difficulty:"hard", type:"single",
+    question:"What is a Media Resource Group List (MRGL) in CUCM?",
+    options:[
+      {text:"An ordered list of Media Resource Groups (MRGs) that defines the priority order for allocating media resources (transcoders, MTPs, conference bridges) to devices", correct:true},
+      {text:"A list of media files for music on hold", correct:false},
+      {text:"A group of SIP trunks for media routing", correct:false},
+      {text:"A configuration for video endpoint resolution settings", correct:false}
+    ],
+    explanation:"MRGL → MRG → individual resources (transcoders, MTPs, conference bridges, MOH servers). MRGLs are assigned to Device Pools or individual devices. CUCM searches groups in MRGL order to find available resources."
+  },
+  // ========== Additional Scenario-Based Questions ==========
+  {
+    id:109, category:"QoS", subcategory:"MQC Framework", difficulty:"hard", type:"single",
+    question:"A WAN link is 10 Mbps but the ISP CIR is 5 Mbps. How do you apply QoS to prevent dropping at the ISP?",
+    cli_context:"policy-map SHAPER\n  class class-default\n    shape average 5000000\n    service-policy QOS-CHILD\npolicy-map QOS-CHILD\n  class VOICE\n    priority percent 20\n  class VIDEO\n    bandwidth percent 30\n  class class-default\n    fair-queue",
+    options:[
+      {text:"H-QoS: parent shapes to 5 Mbps CIR; child policy provides LLQ for voice (20% of 5M = 1M), CBWFQ for video (30%), and WFQ for default", correct:true},
+      {text:"The parent sends voice at 20 Mbps; the child limits video to 30 Mbps", correct:false},
+      {text:"Shaping and queuing cannot be combined in a single policy", correct:false},
+      {text:"The percentages are based on the physical 10 Mbps, not the shaped rate", correct:false}
+    ],
+    explanation:"In H-QoS, the child policy percentages are relative to the parent's shaped rate (5 Mbps), not the physical interface speed. Voice gets ~1 Mbps priority, video gets ~1.5 Mbps guaranteed. This prevents ISP drops by matching QoS to the contracted rate."
+  },
+  {
+    id:110, category:"CUBE", subcategory:"Troubleshooting", difficulty:"hard", type:"single",
+    question:"A one-way audio issue exists on calls through CUBE. What is the most likely cause?",
+    options:[
+      {text:"NAT or firewall blocking RTP in one direction; or incorrect media binding (bind media source-interface mismatch)", correct:true},
+      {text:"Codec mismatch between endpoints", correct:false},
+      {text:"SIP signaling is using TLS", correct:false},
+      {text:"The CUCM publisher is down", correct:false}
+    ],
+    explanation:"One-way audio on CUBE is typically caused by: 1) NAT/firewall blocking RTP, 2) incorrect <code>bind media source-interface</code>, 3) IP routing asymmetry, or 4) media flow-around with NAT. Check with <code>show voip rtp connections</code> and verify bidirectional RTP."
+  },
+  {
+    id:111, category:"CUBE", subcategory:"Basic Configuration", difficulty:"hard", type:"single",
+    question:"What does <code>voice service voip\n sip\n  no supplementary-service sip moved-temporarily</code> do?",
+    options:[
+      {text:"Prevents CUBE from processing SIP 302 Moved Temporarily redirects, keeping CUBE in the call path for transferred calls", correct:true},
+      {text:"Disables all SIP services temporarily", correct:false},
+      {text:"Stops CUBE from moving calls between dial-peers", correct:false},
+      {text:"Blocks temporary phone registrations", correct:false}
+    ],
+    explanation:"By default, CUBE follows SIP 302 redirects by sending a new INVITE to the redirect target. <code>no supplementary-service sip moved-temporarily</code> passes the 302 back to the originator, keeping CUBE in the signaling path for policy enforcement."
+  },
+  {
+    id:112, category:"Protocols", subcategory:"SIP", difficulty:"hard", type:"single",
+    question:"What is the difference between SIP 401 and 407 response codes?",
+    options:[
+      {text:"401 = endpoint must authenticate with the UAS (WWW-Authenticate); 407 = endpoint must authenticate with the proxy (Proxy-Authenticate)", correct:true},
+      {text:"401 = forbidden; 407 = method not allowed", correct:false},
+      {text:"401 = server error; 407 = client error", correct:false},
+      {text:"They are identical in function", correct:false}
+    ],
+    explanation:"401 Unauthorized is sent by the UAS (User Agent Server) requesting WWW-Authenticate credentials. 407 Proxy Authentication Required is sent by a SIP proxy requesting Proxy-Authenticate credentials. Both trigger digest authentication."
+  },
+  {
+    id:113, category:"Infrastructure", subcategory:"Design", difficulty:"hard", type:"single",
+    question:"What is the Cisco Unified CM Session Management Edition (SME)?",
+    options:[
+      {text:"A centralized CUCM instance that acts as a SIP session routing hub, interconnecting multiple CUCM leaf clusters and unifying dial plans", correct:true},
+      {text:"A management tool for monitoring SIP sessions", correct:false},
+      {text:"A scaled-down CUCM for small branch offices", correct:false},
+      {text:"A cloud management portal for CUCM clusters", correct:false}
+    ],
+    explanation:"CUCM SME provides centralized session routing between multiple leaf clusters via SIP trunks. It simplifies dial plan management by handling inter-cluster routing, URI dialing, and PSTN gateway selection from a single point."
+  },
+  {
+    id:114, category:"Call Control", subcategory:"CUCM Routing", difficulty:"hard", type:"single",
+    question:"What is a SIP Route Pattern in CUCM?",
+    options:[
+      {text:"A pattern that routes SIP requests (including URI-based dialing) to a SIP trunk, enabling domain-based call routing", correct:true},
+      {text:"A route pattern that only works with SCCP phones", correct:false},
+      {text:"A pattern for matching SIP response codes", correct:false},
+      {text:"A DNS configuration for SIP servers", correct:false}
+    ],
+    explanation:"SIP Route Patterns match the domain portion of SIP URIs (e.g., *@example.com) and route calls to the specified SIP trunk. They enable URI-based dialing alongside traditional E.164 route patterns."
+  },
+  {
+    id:115, category:"QoS", subcategory:"Classification & Marking", difficulty:"medium", type:"single",
+    question:"What is the relationship between IP Precedence and DSCP?",
+    options:[
+      {text:"IP Precedence uses the first 3 bits of the ToS byte (8 values); DSCP uses the first 6 bits (64 values) — DSCP supersedes IP Precedence and is backward compatible", correct:true},
+      {text:"They are completely separate fields in different headers", correct:false},
+      {text:"IP Precedence is for IPv4; DSCP is for IPv6 only", correct:false},
+      {text:"DSCP is a subset of IP Precedence", correct:false}
+    ],
+    explanation:"DSCP redefines the ToS byte, using 6 bits instead of the 3-bit IP Precedence field. Class Selector (CS) DSCP values map directly to IP Precedence values for backward compatibility (CS0=0, CS1=1, etc.)."
+  },
+  // ====== MULTI-SELECT QUESTIONS ======
+  {
+    id:116, category:"QoS", subcategory:"MQC Framework", difficulty:"medium", type:"multiple",
+    question:"Which three components make up the MQC (Modular QoS CLI) framework? (Choose 3)",
+    options:[
+      {text:"class-map — classifies traffic based on match criteria", correct:true},
+      {text:"policy-map — defines actions to apply to classified traffic", correct:true},
+      {text:"service-policy — attaches the policy to an interface", correct:true},
+      {text:"access-map — filters traffic using VACLs", correct:false},
+      {text:"route-map — matches and sets attributes for routing", correct:false}
+    ],
+    explanation:"MQC uses three components: <code>class-map</code> (classify), <code>policy-map</code> (define actions like police, shape, queue), and <code>service-policy</code> (apply to interface). Access-maps and route-maps are unrelated features."
+  },
+  {
+    id:117, category:"CUBE", subcategory:"Troubleshooting", difficulty:"hard", type:"multiple",
+    question:"Which two commands are most useful for real-time troubleshooting of SIP calls on CUBE? (Choose 2)",
+    options:[
+      {text:"debug ccsip messages", correct:true},
+      {text:"debug voip ccapi inout", correct:true},
+      {text:"show running-config | section sip-ua", correct:false},
+      {text:"show ip interface brief", correct:false}
+    ],
+    explanation:"<code>debug ccsip messages</code> displays raw SIP message exchanges (INVITE, 200 OK, etc.), while <code>debug voip ccapi inout</code> traces the call control API showing call setup flow and dial-peer selection. The show commands provide configuration info but not real-time call debugging."
+  },
+  {
+    id:118, category:"Protocols", subcategory:"SIP", difficulty:"medium", type:"multiple",
+    question:"Which two of the following are SIP provisional (1xx) responses? (Choose 2)",
+    options:[
+      {text:"100 Trying", correct:true},
+      {text:"180 Ringing", correct:true},
+      {text:"200 OK", correct:false},
+      {text:"302 Moved Temporarily", correct:false},
+      {text:"404 Not Found", correct:false}
+    ],
+    explanation:"1xx responses are provisional: 100 Trying (request received, working), 180 Ringing (alerting user), 183 Session Progress. 200 OK is a success (2xx), 302 is redirection (3xx), and 404 is client error (4xx)."
+  },
+  {
+    id:119, category:"Infrastructure", subcategory:"CUCM", difficulty:"hard", type:"multiple",
+    question:"Which three services are unique to the CUCM Publisher node and cannot run on Subscribers? (Choose 3)",
+    options:[
+      {text:"Database write/replication master", correct:true},
+      {text:"TFTP file master (initial file creation)", correct:true},
+      {text:"CDR/CAR repository master", correct:true},
+      {text:"Call processing (Cisco CallManager service)", correct:false},
+      {text:"CTI Manager service", correct:false}
+    ],
+    explanation:"The Publisher is the database master (read/write), TFTP master, and CDR repository. Call processing (CCM service) and CTI Manager run on Subscribers as well as the Publisher for redundancy."
+  },
+  {
+    id:120, category:"QoS", subcategory:"Queuing", difficulty:"hard", type:"multiple",
+    question:"Which two statements about Low Latency Queuing (LLQ) are correct? (Choose 2)",
+    options:[
+      {text:"LLQ provides a strict priority queue for delay-sensitive traffic like voice", correct:true},
+      {text:"LLQ traffic is policed to prevent it from starving other queues", correct:true},
+      {text:"LLQ guarantees bandwidth but does not prioritize packet ordering", correct:false},
+      {text:"LLQ uses tail-drop exclusively and cannot use WRED", correct:false}
+    ],
+    explanation:"LLQ (<code>priority</code> command in policy-map) creates a strict priority queue — packets are always serviced first. To prevent starvation, traffic exceeding the configured bandwidth is policed (dropped). WRED is not applied to LLQ classes."
+  },
+  {
+    id:121, category:"Call Control", subcategory:"Routing", difficulty:"medium", type:"multiple",
+    question:"Which two elements are required to implement a complete call routing chain in CUCM? (Choose 2)",
+    options:[
+      {text:"Route Group — groups gateways/trunks for redundancy and load balancing", correct:true},
+      {text:"Route List — ordered list of Route Groups tried sequentially", correct:true},
+      {text:"Media Resource Group List — assigns conference bridges and transcoders", correct:false},
+      {text:"Device Pool — assigns date/time group and region to phones", correct:false}
+    ],
+    explanation:"A Route Pattern points to a Route List, which contains ordered Route Groups. Each Route Group contains gateways or trunks. MRGL and Device Pool are configuration elements but not part of the call routing chain."
+  },
+  {
+    id:122, category:"CUBE", subcategory:"Configuration", difficulty:"hard", type:"multiple",
+    question:"Which two configuration elements are required on CUBE to enable basic SIP-to-SIP call routing? (Choose 2)",
+    options:[
+      {text:"An inbound dial-peer matching the calling pattern or SIP URI", correct:true},
+      {text:"An outbound dial-peer with a destination-pattern pointing to the next hop", correct:true},
+      {text:"A voice class codec preference list on every dial-peer", correct:false},
+      {text:"An ISDN switch-type configuration under the voice port", correct:false}
+    ],
+    explanation:"CUBE requires at minimum an inbound dial-peer (matching incoming calls) and an outbound dial-peer (routing to destination). Codec preferences and ISDN switch-types are optional or used for TDM interfaces, not basic SIP-to-SIP routing."
+  },
+  {
+    id:123, category:"Collaboration Apps", subcategory:"IM&P", difficulty:"medium", type:"multiple",
+    question:"Which two presence states are defined in XMPP for Cisco IM and Presence? (Choose 2)",
+    options:[
+      {text:"Available", correct:true},
+      {text:"Do Not Disturb", correct:true},
+      {text:"Parked", correct:false},
+      {text:"Holding", correct:false}
+    ],
+    explanation:"Standard XMPP/IM&P presence states include Available, Away, Do Not Disturb (DND), and Offline. Parked and Holding are call states, not presence states."
+  },
+  {
+    id:124, category:"IOS XE Gateway", subcategory:"Voice Ports", difficulty:"medium", type:"multiple",
+    question:"Which two statements correctly describe voice port types on an IOS-XE gateway? (Choose 2)",
+    options:[
+      {text:"FXS ports connect to analog endpoints like phones and fax machines", correct:true},
+      {text:"FXO ports connect to the PSTN or a PBX trunk line", correct:true},
+      {text:"FXS ports connect to the PSTN for outbound dialing", correct:false},
+      {text:"FXO ports provide ring voltage and battery to analog devices", correct:false}
+    ],
+    explanation:"FXS (Foreign Exchange Station) provides dial tone, ring voltage, and battery to endpoint devices. FXO (Foreign Exchange Office) connects to the PSTN or PBX, receiving ring voltage. They are complementary — FXS connects to stations, FXO connects to the office/network side."
+  },
+  {
+    id:125, category:"QoS", subcategory:"Policing & Shaping", difficulty:"hard", type:"multiple",
+    question:"Which two statements about traffic policing are correct? (Choose 2)",
+    options:[
+      {text:"Policing drops or re-marks excess traffic immediately", correct:true},
+      {text:"Policing operates at the ingress or egress of an interface", correct:true},
+      {text:"Policing buffers excess traffic to smooth bursts", correct:false},
+      {text:"Policing can only be applied in the outbound direction", correct:false}
+    ],
+    explanation:"Traffic policing uses a token bucket to measure traffic rates and immediately drops or re-marks packets exceeding the committed rate. Unlike shaping, policing does not buffer packets. It can be applied inbound or outbound via <code>service-policy input|output</code>."
   }
 ];

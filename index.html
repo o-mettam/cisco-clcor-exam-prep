@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     fontFamily: {
@@ -24,7 +25,7 @@
     </script>
     <style>
         * { box-sizing: border-box; }
-        body { font-family: 'Inter', system-ui, sans-serif; }
+        body { font-family: 'Inter', system-ui, sans-serif; transition: background-color 0.3s, color 0.3s; }
         .cli-block {
             font-family: 'JetBrains Mono', monospace;
             background: #1a1a2e; color: #00ff88;
@@ -47,93 +48,132 @@
         ::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 3px; }
         ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+        .dark ::-webkit-scrollbar-track { background: #1e293b; }
+        .dark ::-webkit-scrollbar-thumb { background: #475569; }
+        .dark .option-btn:hover:not(.selected):not(.correct):not(.incorrect) { background: rgba(4,159,217,0.1); }
+        .dark .option-btn.selected { background: rgba(4,159,217,0.2); }
+        .dark .option-btn.correct { background: rgba(108,192,74,0.15); }
+        .dark .option-btn.incorrect { background: rgba(207,32,48,0.15); }
+        .option-btn.multi-selected { border-color: #049fd9; background: rgba(4,159,217,0.1); box-shadow: 0 0 0 2px rgba(4,159,217,0.2); }
+        .dark .option-btn.multi-selected { background: rgba(4,159,217,0.2); }
+        .history-bar { height: 32px; min-width: 2px; border-radius: 4px; transition: all 0.3s; cursor: pointer; position: relative; }
+        .history-bar:hover { opacity: 0.8; transform: scaleY(1.05); }
+        .history-bar .tooltip { display: none; position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 4px 8px; border-radius: 6px; font-size: 11px; white-space: nowrap; margin-bottom: 4px; z-index: 10; }
+        .history-bar:hover .tooltip { display: block; }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen">
+<body class="bg-slate-50 dark:bg-slate-900 min-h-screen dark:text-slate-200 transition-colors">
 
 <!-- ============ START SCREEN ============ -->
 <div id="startScreen" class="min-h-screen flex items-center justify-center p-4">
     <div class="max-w-2xl w-full">
-        <div class="text-center mb-8">
+        <div class="text-center mb-8 relative">
+            <button onclick="toggleDarkMode()" id="darkToggleStart" class="absolute right-0 top-0 p-2 rounded-xl border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors" title="Toggle dark mode">
+                <svg id="sunIcon" class="w-5 h-5 text-amber-500 hidden" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"/></svg>
+                <svg id="moonIcon" class="w-5 h-5 text-slate-500" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/></svg>
+            </button>
             <div class="inline-flex items-center gap-2 bg-cisco-blue/10 text-cisco-blue px-4 py-2 rounded-full text-sm font-medium mb-6">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 CCNP Collaboration
             </div>
-            <h1 class="text-4xl font-extrabold text-cisco-dark mb-3">CLCOR 350-801 <span class="text-cisco-blue">v2.0</span></h1>
-            <p class="text-lg text-slate-500">Exam Practice Simulator</p>
+            <h1 class="text-4xl font-extrabold text-cisco-dark dark:text-white mb-3">CLCOR 350-801 <span class="text-cisco-blue">v2.0</span></h1>
+            <p class="text-lg text-slate-500 dark:text-slate-400">Exam Practice Simulator</p>
         </div>
-        <div class="bg-white rounded-2xl shadow-lg border border-slate-200 p-8">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 p-8">
             <div class="grid grid-cols-2 gap-4 mb-6">
-                <div class="bg-slate-50 rounded-xl p-4 text-center">
-                    <div class="text-2xl font-bold text-cisco-dark" id="totalQCount">65</div>
-                    <div class="text-xs text-slate-500 mt-1">Total Questions</div>
+                <div class="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 text-center">
+                    <div class="text-2xl font-bold text-cisco-dark dark:text-white" id="totalQCount">125</div>
+                    <div class="text-xs text-slate-500 dark:text-slate-400 mt-1">Total Questions</div>
                 </div>
-                <div class="bg-slate-50 rounded-xl p-4 text-center">
-                    <div class="text-2xl font-bold text-cisco-dark">120 min</div>
-                    <div class="text-xs text-slate-500 mt-1">Time Limit</div>
+                <div class="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 text-center">
+                    <div class="text-2xl font-bold text-cisco-dark dark:text-white">120 min</div>
+                    <div class="text-xs text-slate-500 dark:text-slate-400 mt-1">Time Limit</div>
                 </div>
             </div>
-            <h3 class="font-semibold text-cisco-dark mb-3">Focus Areas</h3>
+            <h3 class="font-semibold text-cisco-dark dark:text-white mb-3">Focus Areas</h3>
             <div id="categoryFilters" class="flex flex-wrap gap-2 mb-6"></div>
             <div class="mb-6">
-                <h3 class="font-semibold text-cisco-dark mb-3">Exam Mode</h3>
+                <h3 class="font-semibold text-cisco-dark dark:text-white mb-3">Exam Mode</h3>
                 <div class="grid grid-cols-2 gap-3">
-                    <label class="flex items-center gap-3 p-3 rounded-xl border-2 border-slate-200 cursor-pointer hover:border-cisco-blue transition-colors has-[:checked]:border-cisco-blue has-[:checked]:bg-cisco-blue/5">
+                    <label class="flex items-center gap-3 p-3 rounded-xl border-2 border-slate-200 dark:border-slate-600 cursor-pointer hover:border-cisco-blue transition-colors has-[:checked]:border-cisco-blue has-[:checked]:bg-cisco-blue/5">
                         <input type="radio" name="mode" value="practice" checked class="accent-cisco-blue w-4 h-4">
-                        <div><div class="font-medium text-sm">Practice</div><div class="text-xs text-slate-400">Show answers after each question</div></div>
+                        <div><div class="font-medium text-sm dark:text-slate-200">Practice</div><div class="text-xs text-slate-400">Show answers after each question</div></div>
                     </label>
-                    <label class="flex items-center gap-3 p-3 rounded-xl border-2 border-slate-200 cursor-pointer hover:border-cisco-blue transition-colors has-[:checked]:border-cisco-blue has-[:checked]:bg-cisco-blue/5">
+                    <label class="flex items-center gap-3 p-3 rounded-xl border-2 border-slate-200 dark:border-slate-600 cursor-pointer hover:border-cisco-blue transition-colors has-[:checked]:border-cisco-blue has-[:checked]:bg-cisco-blue/5">
                         <input type="radio" name="mode" value="exam" class="accent-cisco-blue w-4 h-4">
-                        <div><div class="font-medium text-sm">Exam</div><div class="text-xs text-slate-400">Timed, results at end</div></div>
+                        <div><div class="font-medium text-sm dark:text-slate-200">Exam</div><div class="text-xs text-slate-400">Timed, results at end</div></div>
                     </label>
                 </div>
             </div>
             <div class="mb-6">
-                <h3 class="font-semibold text-cisco-dark mb-3">Number of Questions</h3>
-                <div class="flex gap-2" id="qCountBtns">
-                    <button onclick="setQuestionCount(10)" class="qcb px-4 py-2 rounded-lg border-2 border-slate-200 text-sm font-medium hover:border-cisco-blue transition-colors">10</button>
-                    <button onclick="setQuestionCount(25)" class="qcb px-4 py-2 rounded-lg border-2 border-slate-200 text-sm font-medium hover:border-cisco-blue transition-colors">25</button>
-                    <button onclick="setQuestionCount(50)" class="qcb px-4 py-2 rounded-lg border-2 border-slate-200 text-sm font-medium hover:border-cisco-blue transition-colors">50</button>
-                    <button onclick="setQuestionCount(0)" class="qcb active px-4 py-2 rounded-lg border-2 border-cisco-blue bg-cisco-blue/10 text-cisco-blue text-sm font-medium">All</button>
+                <h3 class="font-semibold text-cisco-dark dark:text-white mb-3">Number of Questions</h3>
+                <div class="flex gap-2 flex-wrap" id="qCountBtns">
+                    <button onclick="setQuestionCount(10)" class="qcb px-4 py-2 rounded-lg border-2 border-slate-200 dark:border-slate-600 text-sm font-medium hover:border-cisco-blue transition-colors dark:text-slate-300">10</button>
+                    <button onclick="setQuestionCount(25)" class="qcb px-4 py-2 rounded-lg border-2 border-slate-200 dark:border-slate-600 text-sm font-medium hover:border-cisco-blue transition-colors dark:text-slate-300">25</button>
+                    <button onclick="setQuestionCount(50)" class="qcb px-4 py-2 rounded-lg border-2 border-slate-200 dark:border-slate-600 text-sm font-medium hover:border-cisco-blue transition-colors dark:text-slate-300">50</button>
+                    <button onclick="setQuestionCount(75)" class="qcb active px-4 py-2 rounded-lg border-2 border-cisco-blue bg-cisco-blue/10 text-cisco-blue text-sm font-medium">75 (Max)</button>
                 </div>
             </div>
-            <button onclick="startExam()" class="w-full bg-cisco-blue hover:bg-cisco-blue/90 text-white font-semibold py-4 rounded-xl transition-colors text-lg shadow-lg shadow-cisco-blue/20">
+            <button onclick="startExam()" id="startBtn" class="w-full bg-cisco-blue hover:bg-cisco-blue/90 text-white font-semibold py-4 rounded-xl transition-colors text-lg shadow-lg shadow-cisco-blue/20">
                 Start Exam
             </button>
+            <button onclick="resumeExam()" id="resumeBtn" class="hidden w-full mt-3 bg-cisco-green hover:bg-cisco-green/90 text-white font-semibold py-4 rounded-xl transition-colors text-lg shadow-lg shadow-cisco-green/20">
+                Resume Saved Exam
+            </button>
         </div>
-        <p class="text-center text-xs text-slate-400 mt-6">Based on the official Cisco 350-801 CLCOR v2.0 exam blueprint.<br>Heavy focus: QoS &amp; CUBE/IOS-XE CLI Operations</p>
+        <!-- Performance History -->
+        <div id="historySection" class="hidden bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 p-6 mt-4">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="font-semibold text-cisco-dark dark:text-white">Performance History</h3>
+                <button onclick="clearHistory()" class="text-xs text-slate-400 hover:text-cisco-red transition-colors">Clear</button>
+            </div>
+            <div id="historyChart" class="flex items-end gap-1 h-36 border-b border-slate-200 dark:border-slate-700 pb-2 mb-3 overflow-x-auto"></div>
+            <div class="flex justify-between text-xs text-slate-400">
+                <span id="historyOldest"></span>
+                <span id="historyNewest"></span>
+            </div>
+            <div class="grid grid-cols-3 gap-3 mt-4">
+                <div class="text-center"><div id="histAvg" class="text-lg font-bold text-cisco-blue">—</div><div class="text-xs text-slate-500">Avg Score</div></div>
+                <div class="text-center"><div id="histBest" class="text-lg font-bold text-cisco-green">—</div><div class="text-xs text-slate-500">Best</div></div>
+                <div class="text-center"><div id="histCount" class="text-lg font-bold text-slate-600 dark:text-slate-300">—</div><div class="text-xs text-slate-500">Attempts</div></div>
+            </div>
+        </div>
+        <p class="text-center text-xs text-slate-400 dark:text-slate-500 mt-6">Based on the <a href="https://learningnetwork.cisco.com/s/clcor-exam-topics" target="_blank" class="text-cisco-blue hover:underline">official Cisco 350-801 CLCOR v2.0 exam blueprint</a>.</p>
     </div>
 </div>
 
 <!-- ============ EXAM SCREEN ============ -->
 <div id="examScreen" class="hidden min-h-screen">
-    <div class="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-slate-200 shadow-sm">
+    <div class="sticky top-0 z-50 bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700 shadow-sm">
         <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
             <div class="flex items-center gap-4">
-                <h2 class="font-bold text-cisco-dark text-sm hidden sm:block">CLCOR 350-801</h2>
+                <h2 class="font-bold text-cisco-dark dark:text-white text-sm hidden sm:block">CLCOR 350-801</h2>
                 <span id="categoryBadge" class="text-xs px-2.5 py-1 rounded-full bg-cisco-blue/10 text-cisco-blue font-medium"></span>
             </div>
             <div class="flex items-center gap-4 sm:gap-6">
                 <div class="flex items-center gap-2 text-sm">
                     <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    <span id="timer" class="font-mono font-semibold text-cisco-dark">120:00</span>
+                    <span id="timer" class="font-mono font-semibold text-cisco-dark dark:text-white">120:00</span>
                 </div>
                 <div class="text-sm font-medium text-slate-500">
-                    <span id="currentQ" class="text-cisco-dark font-bold">1</span>/<span id="totalQ">65</span>
+                    <span id="currentQ" class="text-cisco-dark dark:text-white font-bold">1</span>/<span id="totalQ" class="dark:text-slate-400">115</span>
                 </div>
-                <button onclick="showNavigator()" class="p-2 rounded-lg hover:bg-slate-100 transition-colors" title="Question Navigator">
+                <button onclick="toggleDarkMode()" class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors" title="Toggle dark mode">
+                    <svg class="w-5 h-5 text-slate-500 dark:text-slate-400 dark-toggle-icon" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/></svg>
+                </button>
+                <button onclick="showNavigator()" class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors" title="Question Navigator">
                     <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
                 </button>
             </div>
         </div>
-        <div class="h-1 bg-slate-100">
+        <div class="h-1 bg-slate-100 dark:bg-slate-700">
             <div id="progressBar" class="h-full bg-gradient-to-r from-cisco-blue to-cisco-navy transition-all duration-500" style="width:0%"></div>
         </div>
     </div>
     <div class="max-w-4xl mx-auto px-4 py-8">
         <div id="questionArea" class="fade-in"></div>
-        <div class="flex items-center justify-between mt-8 pt-6 border-t border-slate-200">
-            <button onclick="prevQuestion()" id="prevBtn" class="flex items-center gap-2 px-5 py-2.5 rounded-xl border-2 border-slate-200 text-slate-600 font-medium hover:border-slate-300 transition-colors">
+        <div class="flex items-center justify-between mt-8 pt-6 border-t border-slate-200 dark:border-slate-700">
+            <button onclick="prevQuestion()" id="prevBtn" class="flex items-center gap-2 px-5 py-2.5 rounded-xl border-2 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 font-medium hover:border-slate-300 dark:hover:border-slate-500 transition-colors">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
                 Prev
             </button>
@@ -154,11 +194,28 @@
     </div>
 </div>
 
+<!-- ============ CONFIRM END MODAL ============ -->
+<div id="confirmEndModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onclick="if(event.target===this)hideConfirmEnd()">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-sm w-full p-6 fade-in">
+        <div class="text-center mb-4">
+            <div class="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center mx-auto mb-3">
+                <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg>
+            </div>
+            <h3 class="font-bold text-lg text-cisco-dark dark:text-white mb-1">End Exam?</h3>
+            <p class="text-sm text-slate-500 dark:text-slate-400" id="confirmEndMsg">You have unanswered questions.</p>
+        </div>
+        <div class="flex gap-3">
+            <button onclick="hideConfirmEnd()" class="flex-1 py-2.5 rounded-xl border-2 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 font-medium hover:border-slate-300 transition-colors text-sm">Continue Exam</button>
+            <button onclick="forceEndExam()" class="flex-1 py-2.5 rounded-xl bg-cisco-red text-white font-medium hover:bg-cisco-red/90 transition-colors text-sm">End Exam</button>
+        </div>
+    </div>
+</div>
+
 <!-- ============ NAVIGATOR MODAL ============ -->
 <div id="navigatorModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onclick="if(event.target===this)hideNavigator()">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[80vh] overflow-hidden">
-        <div class="p-6 border-b border-slate-200 flex items-center justify-between">
-            <h3 class="font-bold text-lg text-cisco-dark">Question Navigator</h3>
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-lg w-full max-h-[80vh] overflow-hidden">
+        <div class="p-6 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+            <h3 class="font-bold text-lg text-cisco-dark dark:text-white">Question Navigator</h3>
             <button onclick="hideNavigator()" class="p-1 rounded-lg hover:bg-slate-100">
                 <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
@@ -173,7 +230,7 @@
             </div>
             <div id="navigatorGrid" class="grid grid-cols-8 gap-2"></div>
         </div>
-        <div class="p-4 border-t border-slate-200 bg-slate-50 flex justify-between items-center">
+        <div class="p-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 flex justify-between items-center">
             <span class="text-sm text-slate-500" id="navStats"></span>
             <button onclick="endExam()" class="px-4 py-2 rounded-lg bg-cisco-red text-white text-sm font-medium hover:bg-cisco-red/90 transition-colors">End Exam</button>
         </div>
@@ -181,21 +238,21 @@
 </div>
 
 <!-- ============ RESULTS SCREEN ============ -->
-<div id="resultsScreen" class="hidden min-h-screen bg-slate-50 p-4">
+<div id="resultsScreen" class="hidden min-h-screen bg-slate-50 dark:bg-slate-900 p-4">
     <div class="max-w-3xl mx-auto py-8">
         <div class="text-center mb-8">
-            <h1 class="text-3xl font-extrabold text-cisco-dark mb-2">Exam Complete</h1>
-            <p class="text-slate-500">CLCOR 350-801 v2.0 Practice Results</p>
+            <h1 class="text-3xl font-extrabold text-cisco-dark dark:text-white mb-2">Exam Complete</h1>
+            <p class="text-slate-500 dark:text-slate-400">CLCOR 350-801 v2.0 Practice Results</p>
         </div>
-        <div class="bg-white rounded-2xl shadow-lg border border-slate-200 p-8 mb-6">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 p-8 mb-6">
             <div class="flex items-center justify-center mb-8">
                 <div class="relative">
                     <svg class="w-40 h-40" viewBox="0 0 120 120">
-                        <circle cx="60" cy="60" r="54" fill="none" stroke="#e2e8f0" stroke-width="8"/>
+                        <circle cx="60" cy="60" r="54" fill="none" stroke="#e2e8f0" stroke-width="8" class="dark:stroke-slate-700"/>
                         <circle id="scoreCircle" cx="60" cy="60" r="54" fill="none" stroke="#049fd9" stroke-width="8" stroke-linecap="round" class="progress-ring" stroke-dasharray="339.29" stroke-dashoffset="339.29"/>
                     </svg>
                     <div class="absolute inset-0 flex flex-col items-center justify-center">
-                        <span id="scorePercent" class="text-3xl font-extrabold text-cisco-dark">0%</span>
+                        <span id="scorePercent" class="text-3xl font-extrabold text-cisco-dark dark:text-white">0%</span>
                         <span id="passFailLabel" class="text-xs font-semibold mt-1 px-2 py-0.5 rounded-full">SCORE</span>
                     </div>
                 </div>
@@ -206,11 +263,11 @@
                 <div class="text-center p-3 bg-slate-100 rounded-xl"><div id="skippedCount" class="text-2xl font-bold text-slate-500">0</div><div class="text-xs text-slate-500">Skipped</div></div>
                 <div class="text-center p-3 bg-cisco-blue/10 rounded-xl"><div id="timeTaken" class="text-2xl font-bold text-cisco-blue">0:00</div><div class="text-xs text-slate-500">Time</div></div>
             </div>
-            <h3 class="font-bold text-cisco-dark mb-4">Performance by Category</h3>
+            <h3 class="font-bold text-cisco-dark dark:text-white mb-4">Performance by Category</h3>
             <div id="categoryBreakdown" class="space-y-3"></div>
         </div>
-        <div class="bg-white rounded-2xl shadow-lg border border-slate-200 p-8 mb-6">
-            <h3 class="font-bold text-cisco-dark mb-4">Review Questions</h3>
+        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 p-8 mb-6">
+            <h3 class="font-bold text-cisco-dark dark:text-white mb-4">Review Questions</h3>
             <div class="flex gap-2 mb-4 flex-wrap">
                 <button onclick="filterReview('all')" class="review-filter active px-3 py-1.5 rounded-lg text-xs font-medium border-2 border-cisco-blue bg-cisco-blue/10 text-cisco-blue">All</button>
                 <button onclick="filterReview('incorrect')" class="review-filter px-3 py-1.5 rounded-lg text-xs font-medium border-2 border-slate-200 text-slate-500">Incorrect</button>
@@ -219,7 +276,7 @@
             <div id="reviewList" class="space-y-4 max-h-[600px] overflow-y-auto pr-2"></div>
         </div>
         <div class="flex gap-4">
-            <button onclick="location.reload()" class="flex-1 py-4 rounded-xl border-2 border-slate-200 font-semibold text-slate-600 hover:border-slate-300 transition-colors">New Exam</button>
+            <button onclick="location.reload()" class="flex-1 py-4 rounded-xl border-2 border-slate-200 dark:border-slate-600 font-semibold text-slate-600 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-500 transition-colors">New Exam</button>
             <button onclick="retryIncorrect()" id="retryBtn" class="flex-1 py-4 rounded-xl bg-cisco-blue text-white font-semibold hover:bg-cisco-blue/90 transition-colors shadow-lg shadow-cisco-blue/20">Retry Incorrect</button>
         </div>
     </div>
@@ -230,16 +287,175 @@
 // ====== STATE ======
 let activeQuestions = [];
 let currentIndex = 0;
-let userAnswers = {};   // { qIndex: selectedOptionIndex }
+let userAnswers = {};   // { qIndex: selectedOptionIndex or Set for multi }
 let flagged = new Set();
 let revealed = new Set();
 let examMode = 'practice';
-let questionLimit = 0;  // 0 = all
+let questionLimit = 75;  // default max 75
 let timerInterval = null;
 let secondsRemaining = 7200; // 120 min
 let startTime = null;
 let selectedCategories = new Set();
 const allCategories = [...new Set(questions.map(q => q.category))];
+const MAX_EXAM_QUESTIONS = 75;
+
+// ====== DARK MODE ======
+function toggleDarkMode() {
+    const html = document.documentElement;
+    const isDark = html.classList.toggle('dark');
+    localStorage.setItem('darkMode', isDark ? 'dark' : 'light');
+    updateDarkIcons(isDark);
+}
+function updateDarkIcons(isDark) {
+    const sun = document.getElementById('sunIcon');
+    const moon = document.getElementById('moonIcon');
+    if (sun && moon) {
+        sun.classList.toggle('hidden', !isDark);
+        moon.classList.toggle('hidden', isDark);
+    }
+    document.querySelectorAll('.dark-toggle-icon').forEach(el => {
+        if (isDark) {
+            el.innerHTML = '<path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"/>';
+            el.classList.add('text-amber-400');
+        } else {
+            el.innerHTML = '<path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>';
+            el.classList.remove('text-amber-400');
+        }
+    });
+}
+function initDarkMode() {
+    const saved = localStorage.getItem('darkMode');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const isDark = saved === 'dark' || (!saved && prefersDark);
+    if (isDark) document.documentElement.classList.add('dark');
+    updateDarkIcons(isDark);
+}
+initDarkMode();
+
+// ====== PROGRESS PERSISTENCE ======
+function saveProgress() {
+    const state = {
+        activeQuestionsData: activeQuestions,
+        currentIndex, userAnswers: {},
+        flagged: [...flagged],
+        revealed: [...revealed],
+        examMode, startTime, secondsRemaining
+    };
+    // Convert Set answers to arrays for JSON
+    Object.entries(userAnswers).forEach(([k, v]) => {
+        state.userAnswers[k] = v instanceof Set ? { _multi: [...v] } : v;
+    });
+    localStorage.setItem('clcor_progress', JSON.stringify(state));
+}
+
+function loadProgress() {
+    const raw = localStorage.getItem('clcor_progress');
+    if (!raw) return null;
+    try { return JSON.parse(raw); } catch { return null; }
+}
+
+function clearProgress() {
+    localStorage.removeItem('clcor_progress');
+}
+
+function resumeExam() {
+    const saved = loadProgress();
+    if (!saved) return;
+    activeQuestions = saved.activeQuestionsData;
+    currentIndex = saved.currentIndex;
+    flagged = new Set(saved.flagged);
+    revealed = new Set(saved.revealed);
+    examMode = saved.examMode;
+    startTime = saved.startTime;
+    secondsRemaining = saved.secondsRemaining;
+    // Restore answers (handle multi-select Sets)
+    userAnswers = {};
+    Object.entries(saved.userAnswers).forEach(([k, v]) => {
+        userAnswers[k] = (v && v._multi) ? new Set(v._multi) : v;
+    });
+
+    document.getElementById('startScreen').classList.add('hidden');
+    document.getElementById('examScreen').classList.remove('hidden');
+    document.getElementById('totalQ').textContent = activeQuestions.length;
+    document.getElementById('checkBtn').classList.toggle('hidden', examMode === 'exam');
+    startTimer();
+    renderQuestion();
+}
+
+// ====== PERFORMANCE HISTORY ======
+function getHistory() {
+    try { return JSON.parse(localStorage.getItem('clcor_history') || '[]'); } catch { return []; }
+}
+
+function saveToHistory(pct, correct, total, elapsed, catStats) {
+    const history = getHistory();
+    history.push({ date: Date.now(), pct, correct, total, elapsed, catStats, mode: examMode });
+    // Keep last 50
+    if (history.length > 50) history.splice(0, history.length - 50);
+    localStorage.setItem('clcor_history', JSON.stringify(history));
+}
+
+function renderHistory() {
+    const history = getHistory();
+    const section = document.getElementById('historySection');
+    if (history.length === 0) { section.classList.add('hidden'); return; }
+    section.classList.remove('hidden');
+
+    const chart = document.getElementById('historyChart');
+    chart.innerHTML = '';
+    const maxH = 128; // px
+    history.forEach((h, i) => {
+        const bar = document.createElement('div');
+        const height = Math.max(4, (h.pct / 100) * maxH);
+        const color = h.pct >= 70 ? '#6cc04a' : h.pct >= 50 ? '#fbbf24' : '#cf2030';
+        bar.className = 'history-bar';
+        bar.style.cssText = `height:${height}px;background:${color};flex:1;max-width:20px;`;
+        const date = new Date(h.date);
+        const dateStr = `${date.getMonth()+1}/${date.getDate()} ${date.getHours()}:${date.getMinutes().toString().padStart(2,'0')}`;
+        bar.innerHTML = `<span class="tooltip">${h.pct}% (${h.correct}/${h.total}) — ${dateStr}</span>`;
+        chart.appendChild(bar);
+    });
+
+    // 70% pass line
+    const passLine = document.createElement('div');
+    passLine.style.cssText = `position:absolute;bottom:${(70/100)*maxH + 8}px;left:0;right:0;border-top:1.5px dashed #94a3b8;pointer-events:none;`;
+    chart.style.position = 'relative';
+    chart.appendChild(passLine);
+
+    const scores = history.map(h => h.pct);
+    document.getElementById('histAvg').textContent = Math.round(scores.reduce((a,b)=>a+b,0)/scores.length) + '%';
+    document.getElementById('histBest').textContent = Math.max(...scores) + '%';
+    document.getElementById('histCount').textContent = history.length;
+
+    const oldest = new Date(history[0].date);
+    const newest = new Date(history[history.length-1].date);
+    const fmt = d => `${d.getMonth()+1}/${d.getDate()}`;
+    document.getElementById('historyOldest').textContent = fmt(oldest);
+    document.getElementById('historyNewest').textContent = fmt(newest);
+}
+
+function clearHistory() {
+    if (!confirm('Clear all performance history?')) return;
+    localStorage.removeItem('clcor_history');
+    renderHistory();
+}
+
+// ====== CONFIRM END ======
+function showConfirmEnd() {
+    const answered = Object.keys(userAnswers).length;
+    const total = activeQuestions.length;
+    const unanswered = total - answered;
+    document.getElementById('confirmEndMsg').textContent = `You have ${unanswered} unanswered question${unanswered !== 1 ? 's' : ''} out of ${total}.`;
+    document.getElementById('confirmEndModal').classList.remove('hidden');
+}
+function hideConfirmEnd() {
+    document.getElementById('confirmEndModal').classList.add('hidden');
+}
+function forceEndExam() {
+    hideConfirmEnd();
+    clearProgress();
+    doEndExam();
+}
 
 // ====== INIT ======
 function init() {
@@ -259,7 +475,7 @@ function init() {
         btn.onclick = () => toggleCategory(cat, btn);
         container.appendChild(btn);
     });
-    document.getElementById('totalQCount').textContent = questions.length;
+    updateAvailableCount();
 }
 
 function toggleCategory(cat, btn) {
@@ -278,17 +494,18 @@ function toggleCategory(cat, btn) {
 
 function updateAvailableCount() {
     const available = questions.filter(q => selectedCategories.has(q.category)).length;
-    document.getElementById('totalQCount').textContent = questionLimit === 0 ? available : Math.min(questionLimit, available);
+    const display = Math.min(questionLimit || MAX_EXAM_QUESTIONS, available);
+    document.getElementById('totalQCount').textContent = display;
 }
 
 function setQuestionCount(n) {
     questionLimit = n;
     document.querySelectorAll('.qcb').forEach(b => {
         b.classList.remove('border-cisco-blue','bg-cisco-blue/10','text-cisco-blue');
-        b.classList.add('border-slate-200');
+        b.classList.add('border-slate-200','dark:border-slate-600');
     });
     event.target.classList.add('border-cisco-blue','bg-cisco-blue/10','text-cisco-blue');
-    event.target.classList.remove('border-slate-200');
+    event.target.classList.remove('border-slate-200','dark:border-slate-600');
     updateAvailableCount();
 }
 
@@ -301,7 +518,8 @@ function startExam() {
         const j = Math.floor(Math.random() * (i + 1));
         [pool[i], pool[j]] = [pool[j], pool[i]];
     }
-    if (questionLimit > 0) pool = pool.slice(0, questionLimit);
+    const limit = questionLimit > 0 ? Math.min(questionLimit, MAX_EXAM_QUESTIONS) : MAX_EXAM_QUESTIONS;
+    pool = pool.slice(0, limit);
     // Shuffle options for each question
     activeQuestions = pool.map(q => {
         const shuffled = [...q.options];
@@ -323,6 +541,7 @@ function startExam() {
     document.getElementById('totalQ').textContent = activeQuestions.length;
     document.getElementById('checkBtn').classList.toggle('hidden', examMode === 'exam');
 
+    saveProgress();
     startTimer();
     renderQuestion();
 }
@@ -368,45 +587,61 @@ function renderQuestion() {
     let html = `<div class="fade-in">`;
     // Header
     html += `<div class="flex items-center gap-3 mb-4 flex-wrap">
-        <span class="text-xs font-bold text-slate-400">Q${currentIndex + 1}</span>
-        <span class="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-500">${q.subcategory}</span>
-        <span class="text-xs px-2 py-0.5 rounded-full ${q.difficulty === 'hard' ? 'bg-red-100 text-red-600' : q.difficulty === 'medium' ? 'bg-amber-100 text-amber-600' : 'bg-green-100 text-green-600'}">${q.difficulty}</span>
+        <span class="text-xs font-bold text-slate-400 dark:text-slate-300">Q${currentIndex + 1}</span>
+        <span class="text-xs px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400">${q.subcategory}</span>
+        <span class="text-xs px-2 py-0.5 rounded-full ${q.difficulty === 'hard' ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' : q.difficulty === 'medium' ? 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' : 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400'}">${q.difficulty}</span>
     </div>`;
     // Question text
-    html += `<h2 class="text-lg font-semibold text-cisco-dark mb-4 leading-relaxed">${q.question}</h2>`;
+    const isMulti = q.type === 'multiple';
+    const correctCount = isMulti ? q.options.filter(o => o.correct).length : 0;
+    html += `<h2 class="text-lg font-semibold text-cisco-dark dark:text-white mb-4 leading-relaxed">${q.question}</h2>`;
+    if (isMulti) {
+        html += `<p class="text-xs font-medium text-cisco-blue mb-3 flex items-center gap-1.5"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>Select ${correctCount} answers</p>`;
+    }
     // CLI context
     if (q.cli_context) {
         html += `<div class="cli-block mb-6">${escapeHtml(q.cli_context)}</div>`;
     }
     // Options
+    const userSel = isMulti ? (userAns instanceof Set ? userAns : new Set()) : null;
     html += `<div class="space-y-3 mb-6">`;
     q.options.forEach((opt, i) => {
         let stateClass = '';
+        const isSelected = isMulti ? userSel.has(i) : userAns === i;
         if (isRevealed) {
             if (opt.correct) stateClass = 'correct';
-            else if (userAns === i) stateClass = 'incorrect';
+            else if (isSelected) stateClass = 'incorrect';
             stateClass += ' disabled';
-        } else if (userAns === i) {
-            stateClass = 'selected';
+        } else if (isSelected) {
+            stateClass = isMulti ? 'multi-selected selected' : 'selected';
         }
         const letter = String.fromCharCode(65 + i);
         const optText = opt.text.includes('\n')
             ? `<pre class="font-mono text-sm leading-relaxed whitespace-pre-wrap">${escapeHtml(opt.text)}</pre>`
             : `<span>${escapeHtml(opt.text)}</span>`;
-        html += `<div class="option-btn flex items-start gap-3 p-4 rounded-xl border-2 border-slate-200 ${stateClass}" onclick="selectOption(${i})">
-            <span class="flex-shrink-0 w-7 h-7 rounded-full border-2 ${stateClass === 'correct' ? 'border-cisco-green bg-cisco-green text-white' : stateClass.includes('incorrect') ? 'border-cisco-red bg-cisco-red text-white' : userAns === i ? 'border-cisco-blue bg-cisco-blue text-white' : 'border-slate-300 text-slate-400'} flex items-center justify-center text-xs font-bold">${isRevealed && opt.correct ? '✓' : isRevealed && userAns === i && !opt.correct ? '✗' : letter}</span>
-            <div class="flex-1 text-sm text-slate-700">${optText}</div>
+        const indicator = isMulti
+            ? `<span class="flex-shrink-0 w-7 h-7 rounded border-2 ${stateClass.includes('correct') ? 'border-cisco-green bg-cisco-green text-white' : stateClass.includes('incorrect') ? 'border-cisco-red bg-cisco-red text-white' : isSelected ? 'border-cisco-blue bg-cisco-blue text-white' : 'border-slate-300 dark:border-slate-500 text-slate-400'} flex items-center justify-center text-xs font-bold">${isRevealed && opt.correct ? '✓' : isRevealed && isSelected && !opt.correct ? '✗' : isSelected ? '✓' : letter}</span>`
+            : `<span class="flex-shrink-0 w-7 h-7 rounded-full border-2 ${stateClass === 'correct' ? 'border-cisco-green bg-cisco-green text-white' : stateClass.includes('incorrect') ? 'border-cisco-red bg-cisco-red text-white' : isSelected ? 'border-cisco-blue bg-cisco-blue text-white' : 'border-slate-300 dark:border-slate-500 text-slate-400'} flex items-center justify-center text-xs font-bold">${isRevealed && opt.correct ? '✓' : isRevealed && isSelected && !opt.correct ? '✗' : letter}</span>`;
+        html += `<div class="option-btn flex items-start gap-3 p-4 rounded-xl border-2 border-slate-200 dark:border-slate-600 ${stateClass}" onclick="selectOption(${i})">
+            ${indicator}
+            <div class="flex-1 text-sm text-slate-700 dark:text-slate-300">${optText}</div>
         </div>`;
     });
     html += `</div>`;
     // Explanation
     if (isRevealed) {
-        const wasCorrect = q.options[userAns]?.correct;
-        html += `<div class="p-5 rounded-xl ${wasCorrect ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'} mb-4 fade-in">
+        let wasCorrect;
+        if (isMulti) {
+            const correctSet = new Set(q.options.map((o,idx) => o.correct ? idx : -1).filter(x => x >= 0));
+            wasCorrect = userSel.size === correctSet.size && [...userSel].every(x => correctSet.has(x));
+        } else {
+            wasCorrect = q.options[userAns]?.correct;
+        }
+        html += `<div class="p-5 rounded-xl ${wasCorrect ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800' : 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'} mb-4 fade-in">
             <div class="flex items-center gap-2 mb-2">
-                <span class="text-sm font-bold ${wasCorrect ? 'text-green-700' : 'text-red-700'}">${wasCorrect ? '✓ Correct!' : '✗ Incorrect'}</span>
+                <span class="text-sm font-bold ${wasCorrect ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'}">${wasCorrect ? '✓ Correct!' : '✗ Incorrect'}</span>
             </div>
-            <div class="text-sm text-slate-700 leading-relaxed">${q.explanation}</div>
+            <div class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">${q.explanation}</div>
         </div>`;
     }
     html += `</div>`;
@@ -449,19 +684,34 @@ function escapeHtml(text) {
 // ====== INTERACTIONS ======
 function selectOption(i) {
     if (revealed.has(currentIndex)) return;
-    userAnswers[currentIndex] = i;
+    const q = activeQuestions[currentIndex];
+    if (q.type === 'multiple') {
+        // Multi-select: toggle the option
+        if (!(userAnswers[currentIndex] instanceof Set)) {
+            userAnswers[currentIndex] = new Set();
+        }
+        const sel = userAnswers[currentIndex];
+        if (sel.has(i)) sel.delete(i);
+        else sel.add(i);
+        if (sel.size === 0) delete userAnswers[currentIndex];
+    } else {
+        userAnswers[currentIndex] = i;
+    }
+    saveProgress();
     renderQuestion();
 }
 
 function checkAnswer() {
     if (userAnswers[currentIndex] === undefined) return;
     revealed.add(currentIndex);
+    saveProgress();
     renderQuestion();
 }
 
 function flagQuestion() {
     if (flagged.has(currentIndex)) flagged.delete(currentIndex);
     else flagged.add(currentIndex);
+    saveProgress();
     renderQuestion();
 }
 
@@ -472,6 +722,7 @@ function nextQuestion() {
     }
     if (currentIndex < activeQuestions.length - 1) {
         currentIndex++;
+        saveProgress();
         renderQuestion();
         window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
@@ -494,7 +745,14 @@ function showNavigator() {
     activeQuestions.forEach((q, i) => {
         let color = 'bg-slate-200 text-slate-600';
         if (revealed.has(i)) {
-            const correct = q.options[userAnswers[i]]?.correct;
+            let correct;
+            if (q.type === 'multiple') {
+                const sel = userAnswers[i] instanceof Set ? userAnswers[i] : new Set();
+                const correctSet = new Set(q.options.map((o,idx) => o.correct ? idx : -1).filter(x => x >= 0));
+                correct = sel.size === correctSet.size && [...sel].every(x => correctSet.has(x));
+            } else {
+                correct = q.options[userAnswers[i]]?.correct;
+            }
             color = correct ? 'bg-cisco-green text-white' : 'bg-cisco-red text-white';
         } else if (flagged.has(i)) {
             color = 'bg-amber-400 text-white';
@@ -518,7 +776,20 @@ function hideNavigator() {
 
 // ====== END EXAM ======
 function endExam() {
+    // Check for unanswered questions
+    const answered = Object.keys(userAnswers).length;
+    const total = activeQuestions.length;
+    if (answered < total) {
+        showConfirmEnd();
+        return;
+    }
+    clearProgress();
+    doEndExam();
+}
+
+function doEndExam() {
     if (timerInterval) clearInterval(timerInterval);
+    clearProgress();
     // In exam mode, reveal all answers
     if (examMode === 'exam') {
         activeQuestions.forEach((_, i) => revealed.add(i));
@@ -531,6 +802,13 @@ function endExam() {
         if (!catStats[q.category]) catStats[q.category] = { correct: 0, total: 0 };
         catStats[q.category].total++;
         if (userAnswers[i] === undefined) { skipped++; }
+        else if (q.type === 'multiple') {
+            const sel = userAnswers[i] instanceof Set ? userAnswers[i] : new Set();
+            const correctSet = new Set(q.options.map((o,idx) => o.correct ? idx : -1).filter(x => x >= 0));
+            const isCorrect = sel.size === correctSet.size && [...sel].every(x => correctSet.has(x));
+            if (isCorrect) { correct++; catStats[q.category].correct++; }
+            else { incorrect++; }
+        }
         else if (q.options[userAnswers[i]]?.correct) { correct++; catStats[q.category].correct++; }
         else { incorrect++; }
     });
@@ -566,13 +844,16 @@ function endExam() {
     Object.entries(catStats).forEach(([cat, s]) => {
         const cpct = Math.round((s.correct / s.total) * 100);
         breakdown.innerHTML += `<div class="flex items-center gap-4">
-            <span class="text-sm font-medium text-slate-600 w-40 shrink-0">${cat}</span>
-            <div class="flex-1 h-3 bg-slate-100 rounded-full overflow-hidden">
+            <span class="text-sm font-medium text-slate-600 dark:text-slate-300 w-40 shrink-0">${cat}</span>
+            <div class="flex-1 h-3 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
                 <div class="h-full rounded-full transition-all duration-700 ${cpct >= 70 ? 'bg-cisco-green' : cpct >= 50 ? 'bg-amber-400' : 'bg-cisco-red'}" style="width:${cpct}%"></div>
             </div>
-            <span class="text-sm font-bold text-slate-700 w-20 text-right">${s.correct}/${s.total} (${cpct}%)</span>
+            <span class="text-sm font-bold text-slate-700 dark:text-slate-300 w-20 text-right">${s.correct}/${s.total} (${cpct}%)</span>
         </div>`;
     });
+
+    // Save to history
+    saveToHistory(pct, correct, total, elapsed, catStats);
 
     // Review list
     buildReviewList('all');
@@ -584,24 +865,38 @@ function buildReviewList(filter) {
     list.innerHTML = '';
     activeQuestions.forEach((q, i) => {
         const userAns = userAnswers[i];
-        const isCorrect = userAns !== undefined && q.options[userAns]?.correct;
+        let isCorrect;
+        if (q.type === 'multiple') {
+            const sel = userAns instanceof Set ? userAns : new Set();
+            const correctSet = new Set(q.options.map((o,idx) => o.correct ? idx : -1).filter(x => x >= 0));
+            isCorrect = userAns !== undefined && sel.size === correctSet.size && [...sel].every(x => correctSet.has(x));
+        } else {
+            isCorrect = userAns !== undefined && q.options[userAns]?.correct;
+        }
         const isFlagged = flagged.has(i);
 
         if (filter === 'incorrect' && (isCorrect || userAns === undefined)) return;
         if (filter === 'flagged' && !isFlagged) return;
 
-        const correctOpt = q.options.find(o => o.correct);
-        const userOpt = userAns !== undefined ? q.options[userAns] : null;
+        const correctOpts = q.options.filter(o => o.correct);
+        const correctText = correctOpts.map(o => escapeHtml(o.text.split('\n')[0])).join('; ');
+        let userText = '';
+        if (q.type === 'multiple' && userAns instanceof Set) {
+            userText = [...userAns].map(idx => escapeHtml(q.options[idx]?.text.split('\n')[0] || '')).join('; ');
+        } else if (userAns !== undefined && typeof userAns === 'number') {
+            userText = escapeHtml(q.options[userAns].text.split('\n')[0]);
+        }
 
-        list.innerHTML += `<div class="p-4 rounded-xl border ${isCorrect ? 'border-green-200 bg-green-50/50' : userAns === undefined ? 'border-slate-200 bg-slate-50' : 'border-red-200 bg-red-50/50'}">
+        list.innerHTML += `<div class="p-4 rounded-xl border ${isCorrect ? 'border-green-200 dark:border-green-800 bg-green-50/50 dark:bg-green-900/20' : userAns === undefined ? 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800' : 'border-red-200 dark:border-red-800 bg-red-50/50 dark:bg-red-900/20'}">
             <div class="flex items-center gap-2 mb-2">
                 <span class="text-xs font-bold ${isCorrect ? 'text-green-600' : userAns === undefined ? 'text-slate-400' : 'text-red-600'}">Q${i+1} ${isCorrect ? '✓' : userAns === undefined ? '—' : '✗'}</span>
                 <span class="text-xs px-1.5 py-0.5 rounded bg-slate-200 text-slate-500">${q.category}</span>
+                ${q.type === 'multiple' ? '<span class="text-xs px-1.5 py-0.5 rounded bg-cisco-blue/20 text-cisco-blue">Multi</span>' : ''}
                 ${isFlagged ? '<span class="text-xs px-1.5 py-0.5 rounded bg-amber-200 text-amber-700">Flagged</span>' : ''}
             </div>
             <p class="text-sm font-medium text-cisco-dark mb-2">${q.question.replace(/<code>/g,'<code class="bg-slate-200 px-1 rounded text-xs font-mono">').replace(/<\/code>/g,'</code>')}</p>
-            ${userOpt && !isCorrect ? `<p class="text-xs text-red-600 mb-1"><strong>Your answer:</strong> ${escapeHtml(userOpt.text.split('\n')[0])}</p>` : ''}
-            <p class="text-xs text-green-700"><strong>Correct:</strong> ${escapeHtml(correctOpt.text.split('\n')[0])}</p>
+            ${userText && !isCorrect ? `<p class="text-xs text-red-600 mb-1"><strong>Your answer:</strong> ${userText}</p>` : ''}
+            <p class="text-xs text-green-700"><strong>Correct:</strong> ${correctText}</p>
             <details class="mt-2"><summary class="text-xs text-cisco-blue cursor-pointer font-medium">Show explanation</summary>
             <p class="text-xs text-slate-600 mt-2 leading-relaxed">${q.explanation}</p></details>
         </div>`;
@@ -624,7 +919,13 @@ function filterReview(filter) {
 function retryIncorrect() {
     const incorrectQs = activeQuestions.filter((q, i) => {
         const ua = userAnswers[i];
-        return ua !== undefined && !q.options[ua]?.correct;
+        if (ua === undefined) return false;
+        if (q.type === 'multiple') {
+            const sel = ua instanceof Set ? ua : new Set();
+            const correctSet = new Set(q.options.map((o,idx) => o.correct ? idx : -1).filter(x => x >= 0));
+            return !(sel.size === correctSet.size && [...sel].every(x => correctSet.has(x)));
+        }
+        return !q.options[ua]?.correct;
     });
     if (incorrectQs.length === 0) { alert('No incorrect questions to retry!'); return; }
     // Re-shuffle options
@@ -641,7 +942,7 @@ function retryIncorrect() {
     flagged = new Set();
     revealed = new Set();
     startTime = Date.now();
-    secondsRemaining = 7200;
+    secondsRemaining = examMode === 'exam' ? 7200 : 0;
 
     document.getElementById('resultsScreen').classList.add('hidden');
     document.getElementById('examScreen').classList.remove('hidden');
