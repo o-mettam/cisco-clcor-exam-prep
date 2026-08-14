@@ -1782,5 +1782,116 @@ const questions = [
       {text:"A toll-free (T) number prefix", correct:false}
     ],
     explanation:"In destination-pattern <code>.T</code>, the <code>T</code> indicates a variable-length pattern terminated by the interdigit timeout, allowing PSTN numbers of varying length to match."
+  },
+  // ========== Additional scenario / applied questions ==========
+  {
+    id:159, category:"Call Control", subcategory:"CUCM Routing", difficulty:"hard", type:"single",
+    question:"You configure the route pattern <code>9.[2-9]XX[2-9]XXXXXX</code> with a discard-digits instruction of PreDot. A user dials 9 4085551234. What digit string is sent to the adjacent PSTN gateway?",
+    options:[
+      {text:"4085551234", correct:true},
+      {text:"94085551234", correct:false},
+      {text:"9", correct:false},
+      {text:"408555", correct:false}
+    ],
+    explanation:"The dot <code>.</code> delimits the access code (9) from the directory number. PreDot discards everything before the dot, so the leading 9 is stripped and <code>4085551234</code> is sent to the adjacent system."
+  },
+  {
+    id:160, category:"Call Control", subcategory:"CUCM Routing", difficulty:"medium", type:"single",
+    question:"Which route pattern uses a negated range so that it matches a 4-digit extension beginning with any digit EXCEPT 0 or 1?",
+    options:[
+      {text:"[^01]XXX", correct:true},
+      {text:"[01^]XXX", correct:false},
+      {text:"^[01]XXX", correct:false},
+      {text:"[!01]XXX", correct:false}
+    ],
+    explanation:"The circumflex <code>^</code> negates a range and must be the first character after the opening bracket, so <code>[^01]</code> matches any single digit except 0 or 1. Followed by <code>XXX</code> it matches a 4-digit extension. Placing <code>^</code> anywhere but first, or using <code>!</code> inside brackets, is invalid."
+  },
+  {
+    id:161, category:"Call Control", subcategory:"CUCM Routing", difficulty:"medium", type:"single",
+    question:"A dial plan uses the pattern <code>8!#</code> for on-net calls. Why is the <code>#</code> included at the end?",
+    options:[
+      {text:"It identifies the end of the dialing sequence so CUCM routes immediately instead of waiting for the interdigit timer", correct:true},
+      {text:"It provides an extra digit for a special dialed number", correct:false},
+      {text:"It negates the preceding range of digits", correct:false},
+      {text:"It matches all National Numbering Plan numbers", correct:false}
+    ],
+    explanation:"Because <code>!</code> matches one or more digits (variable length), CUCM would normally wait for the interdigit timeout. The trailing <code>#</code> marks the end of the dialing sequence so the call is routed immediately once the user presses #. The # must be the last character in the pattern."
+  },
+  {
+    id:162, category:"QoS", subcategory:"MQC Framework", difficulty:"hard", type:"single",
+    question:"You want a class-map that matches packets arriving on GigabitEthernet0/1 AND permitted by ACL 'WEB-TRAFFIC'. Which configuration is correct?",
+    options:[
+      {text:"class-map match-all CLASS1\n  match input-interface GigabitEthernet0/1\n  match access-group name WEB-TRAFFIC", correct:true},
+      {text:"class-map match-any CLASS1\n  match input-interface GigabitEthernet0/1\n  match access-group name WEB-TRAFFIC", correct:false},
+      {text:"class-map match-all CLASS1\n  match interface GigabitEthernet0/1\n  match acl WEB-TRAFFIC", correct:false},
+      {text:"policy-map CLASS1\n  match input-interface GigabitEthernet0/1\n  match access-group name WEB-TRAFFIC", correct:false}
+    ],
+    explanation:"Requiring BOTH criteria means logical AND, so <code>match-all</code> is needed (match-any is OR). The valid criteria are <code>match input-interface</code> and <code>match access-group</code>. Match statements belong in a class-map, not a policy-map."
+  },
+  {
+    id:163, category:"QoS", subcategory:"MQC Framework", difficulty:"medium", type:"single",
+    question:"An engineer wants to verify only the runtime traffic statistics of the classes attached to GigabitEthernet0/0. Which command should they use?",
+    options:[
+      {text:"show policy-map interface GigabitEthernet0/0", correct:true},
+      {text:"show policy-map GigabitEthernet0/0", correct:false},
+      {text:"show policy-map", correct:false},
+      {text:"show class-map interface GigabitEthernet0/0", correct:false}
+    ],
+    explanation:"<code>show policy-map interface interface-name</code> displays traffic statistics for all classes of the service policies applied to that interface. <code>show policy-map</code> alone only shows the configured policy maps, not per-interface counters."
+  },
+  {
+    id:164, category:"QoS", subcategory:"Classification & Marking", difficulty:"hard", type:"single",
+    question:"A campus switch receives Cisco TelePresence video marked CS4. To align with the recommended model, which Layer 2 CoS should the switch trust/map for this traffic, and how does it differ from streaming video that shares the same DSCP?",
+    options:[
+      {text:"CoS 4 for TelePresence; streaming video shares DSCP 32 (CS4) but is marked CoS 3", correct:true},
+      {text:"CoS 5 for TelePresence; streaming video uses CoS 4", correct:false},
+      {text:"CoS 3 for TelePresence; streaming video uses CoS 4", correct:false},
+      {text:"CoS 6 for TelePresence; streaming video uses CoS 5", correct:false}
+    ],
+    explanation:"Both TelePresence and streaming video map to CS4/DSCP 32, but they are differentiated at Layer 2: TelePresence is CoS 4 while streaming video is CoS 3."
+  },
+  {
+    id:165, category:"QoS", subcategory:"Classification & Marking", difficulty:"medium", type:"single",
+    question:"Following the Cisco classification model, an engineer needs to mark a database replication (bulk data) flow. Which DSCP value should be set?",
+    options:[
+      {text:"10 (AF11)", correct:true},
+      {text:"8 (CS1)", correct:false},
+      {text:"18 (AF21)", correct:false},
+      {text:"0 (Best Effort)", correct:false}
+    ],
+    explanation:"Bulk Data maps to AF11, DSCP 10, CoS 1. DSCP 8 (CS1) is Scavenger, and DSCP 18 (AF21) is Transactional Data."
+  },
+  {
+    id:166, category:"QoS", subcategory:"Classification & Marking", difficulty:"hard", type:"multiple",
+    question:"A policy-map marks three flows per the Cisco model. Which two <code>set</code> actions correctly match the application to its DSCP? (Choose 2)",
+    options:[
+      {text:"Voice media: set dscp ef (46)", correct:true},
+      {text:"Call signaling: set dscp cs3 (24)", correct:true},
+      {text:"Routing: set dscp ef (46)", correct:false},
+      {text:"Network management: set dscp cs3 (24)", correct:false}
+    ],
+    explanation:"Voice media = EF/46 and Call Signaling = CS3/24. Routing should be CS6/48 (not EF), and Network Management should be CS2/16 (not CS3)."
+  },
+  {
+    id:167, category:"CUBE", subcategory:"Dial Peers", difficulty:"hard", type:"single",
+    question:"On Cisco UBE you define <code>voice class uri 305 sip</code> with <code>pattern 192\\.168\\.10\\..*:5060</code>, then reference it with <code>incoming uri via 305</code>. What is the purpose of this configuration?",
+    options:[
+      {text:"It matches inbound SIP calls whose Via header comes from any 192.168.10.x host on port 5060, selecting the correct incoming dial-peer", correct:true},
+      {text:"It sets the outbound session target to 192.168.10.x on port 5060", correct:false},
+      {text:"It translates the calling number to the 192.168.10.0/24 range", correct:false},
+      {text:"It defines a dial-peer group named 305 for outbound routing", correct:false}
+    ],
+    explanation:"A <code>voice class uri sip</code> with a regex <code>pattern</code> matches SIP URIs; referenced with <code>incoming uri via</code>, it matches on the Via header source (here any 192.168.10.x host on 5060) to deterministically select the inbound dial-peer."
+  },
+  {
+    id:168, category:"CUBE", subcategory:"Dial Peers", difficulty:"medium", type:"single",
+    question:"In a CUBE outbound design, an inbound dial-peer uses <code>destination dpg 200</code>, and <code>voice class dpg 200</code> lists <code>dial-peer 201 preference 1</code> and <code>dial-peer 202 preference 2</code>. If dial-peer 201 is busy/unavailable, what happens?",
+    options:[
+      {text:"The dial-peer group tries dial-peer 202 next, because it has the lower preference (higher numeric value = tried after preference 1)", correct:true},
+      {text:"The call fails because a dial-peer group only ever uses its first member", correct:false},
+      {text:"Both dial-peers are used simultaneously to fork the call", correct:false},
+      {text:"The call is routed back to CUCM for rerouting", correct:false}
+    ],
+    explanation:"A dial-peer group selects members in preference order (preference 1 is tried first). If the preferred outbound peer (201) is unavailable, the group falls through to the next member (202, preference 2), providing egress redundancy."
   }
 ];
