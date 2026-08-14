@@ -1414,5 +1414,373 @@ const questions = [
       {text:"Policing can only be applied in the outbound direction", correct:false}
     ],
     explanation:"Traffic policing uses a token bucket to measure traffic rates and immediately drops or re-marks packets exceeding the committed rate. Unlike shaping, policing does not buffer packets. It can be applied inbound or outbound via <code>service-policy input|output</code>."
+  },
+  // ========== Call Control - Route Pattern Wildcards (Table 19-4) ==========
+  {
+    id:126, category:"Call Control", subcategory:"CUCM Routing", difficulty:"easy", type:"single",
+    question:"In a CUCM route pattern, which wildcard matches all National Numbering Plan numbers, and can appear only once per route pattern?",
+    options:[
+      {text:"@", correct:true},
+      {text:"X", correct:false},
+      {text:"!", correct:false},
+      {text:".", correct:false}
+    ],
+    explanation:"The at symbol <code>@</code> wildcard matches all National Numbering Plan numbers. Each route pattern can contain only one <code>@</code> wildcard."
+  },
+  {
+    id:127, category:"Call Control", subcategory:"CUCM Routing", difficulty:"easy", type:"single",
+    question:"Which route pattern wildcard matches any single digit in the range 0 through 9?",
+    options:[
+      {text:"X", correct:true},
+      {text:"!", correct:false},
+      {text:"?", correct:false},
+      {text:"@", correct:false}
+    ],
+    explanation:"The <code>X</code> wildcard matches any single digit in the range 0 through 9. In contrast, <code>!</code> matches one or more digits 0-9."
+  },
+  {
+    id:128, category:"Call Control", subcategory:"CUCM Routing", difficulty:"medium", type:"single",
+    question:"In a CUCM route pattern, what does the exclamation point (!) wildcard match?",
+    options:[
+      {text:"One or more digits in the range 0 through 9", correct:true},
+      {text:"Exactly one digit in the range 0 through 9", correct:false},
+      {text:"Zero or more occurrences of the preceding digit or wildcard", correct:false},
+      {text:"All National Numbering Plan numbers", correct:false}
+    ],
+    explanation:"The exclamation point <code>!</code> wildcard matches one or more digits in the range 0 through 9. A single digit is matched by <code>X</code>."
+  },
+  {
+    id:129, category:"Call Control", subcategory:"CUCM Routing", difficulty:"medium", type:"single",
+    question:"Which route pattern character matches zero or more occurrences of the preceding digit or wildcard value?",
+    options:[
+      {text:"?", correct:true},
+      {text:"+", correct:false},
+      {text:"!", correct:false},
+      {text:"X", correct:false}
+    ],
+    explanation:"The question mark <code>?</code> matches zero or more occurrences of the preceding digit or wildcard. The plus sign <code>+</code> matches one or more occurrences of the preceding digit or wildcard."
+  },
+  {
+    id:130, category:"Call Control", subcategory:"CUCM Routing", difficulty:"medium", type:"single",
+    question:"In a CUCM route pattern, what does the plus sign (+) wildcard indicate?",
+    options:[
+      {text:"One or more occurrences of the preceding digit or wildcard value", correct:true},
+      {text:"The international escape character used as a dialable digit", correct:false},
+      {text:"Zero or more occurrences of the preceding digit or wildcard value", correct:false},
+      {text:"A range of values to match", correct:false}
+    ],
+    explanation:"The plus sign <code>+</code> matches one or more occurrences of the preceding digit or wildcard. To use + as the dialable international escape character instead, escape it as <code>\\+</code>."
+  },
+  {
+    id:131, category:"Call Control", subcategory:"CUCM Routing", difficulty:"medium", type:"single",
+    question:"When used inside square brackets in a route pattern, what does the circumflex (^) character do, and what is a rule for its placement?",
+    options:[
+      {text:"It negates a range of values and must be the first character following the opening bracket ([)", correct:true},
+      {text:"It denotes a range of values and must be placed between the two values", correct:false},
+      {text:"It ends the dialing sequence and must be the last character in the pattern", correct:false},
+      {text:"It matches all NANP numbers and can appear only once", correct:false}
+    ],
+    explanation:"The circumflex <code>^</code>, used with square brackets, negates a range of values. It must be the first character after the opening bracket <code>[</code>, and each route pattern can contain only one <code>^</code> character."
+  },
+  {
+    id:132, category:"Call Control", subcategory:"CUCM Routing", difficulty:"hard", type:"single",
+    question:"What is the purpose of the dot (.) character in a CUCM route pattern?",
+    options:[
+      {text:"It acts as a delimiter separating the CUCM access code from the directory number, used with discard digits instructions to strip the access code", correct:true},
+      {text:"It matches zero or more occurrences of the preceding wildcard", correct:false},
+      {text:"It provides an extra digit for special dialed numbers", correct:false},
+      {text:"It identifies the end of the dialing sequence", correct:false}
+    ],
+    explanation:"The dot <code>.</code> is a delimiter that separates the CUCM access code from the directory number. Combined with discard digits instructions, it strips off the access code before sending the number to an adjacent system. Only one <code>.</code> is allowed per route pattern."
+  },
+  {
+    id:133, category:"Call Control", subcategory:"CUCM Routing", difficulty:"medium", type:"single",
+    question:"In a route pattern, what does the octothorpe (#) character generally identify, and where must it be placed?",
+    options:[
+      {text:"It identifies the end of the dialing sequence and must be the last character in the pattern", correct:true},
+      {text:"It provides an extra digit for special dialed numbers and must be first", correct:false},
+      {text:"It negates a range of values and must follow the opening bracket", correct:false},
+      {text:"It separates the access code from the directory number", correct:false}
+    ],
+    explanation:"The octothorpe <code>#</code> (pound sign) generally identifies the end of the dialing sequence. It must be the last character in the pattern."
+  },
+  {
+    id:134, category:"Call Control", subcategory:"CUCM Routing", difficulty:"hard", type:"single",
+    question:"What does the escaped plus sign (\\+) mean in a CUCM route pattern?",
+    options:[
+      {text:"It configures the international escape character +, so + is treated as a dialable digit rather than a wildcard", correct:true},
+      {text:"It matches one or more occurrences of the preceding digit", correct:false},
+      {text:"It matches zero or more occurrences of the preceding digit", correct:false},
+      {text:"It negates the following range of digits", correct:false}
+    ],
+    explanation:"A plus sign preceded by a backslash, <code>\\+</code>, indicates the international escape character +. Using <code>\\+</code> means + is used as a dialable digit, not as the 'one or more' wildcard."
+  },
+  {
+    id:135, category:"Call Control", subcategory:"CUCM Routing", difficulty:"medium", type:"multiple",
+    question:"Which two statements about square brackets [ ] and the hyphen (-) in CUCM route patterns are correct? (Choose 2)",
+    options:[
+      {text:"Square brackets enclose a range of values, and only one value in the range can represent a dialed character", correct:true},
+      {text:"The hyphen, used with square brackets, denotes a range of values", correct:true},
+      {text:"Square brackets match one or more digits in the range 0 through 9", correct:false},
+      {text:"The hyphen negates a range of values", correct:false}
+    ],
+    explanation:"Square brackets <code>[ ]</code> enclose a range of values; only one value in the range can represent a single dialed character. The hyphen <code>-</code>, used within the brackets, denotes the range (e.g. <code>[1-5]</code>). Negation is done with <code>^</code>, not the hyphen."
+  },
+  {
+    id:136, category:"Call Control", subcategory:"CUCM Routing", difficulty:"medium", type:"single",
+    question:"In a CUCM route pattern, which character can provide an extra digit for special dialed numbers?",
+    options:[
+      {text:"*", correct:true},
+      {text:"#", correct:false},
+      {text:"@", correct:false},
+      {text:".", correct:false}
+    ],
+    explanation:"The asterisk <code>*</code> character can provide an extra digit for special dialed numbers."
+  },
+  // ========== QoS - Packet Classification match commands (Table 13-4) ==========
+  {
+    id:137, category:"QoS", subcategory:"MQC Framework", difficulty:"medium", type:"single",
+    question:"Within a class-map, which command checks packets against the contents of a named access control list (ACL) to determine class membership?",
+    options:[
+      {text:"match access-group access-group-name", correct:true},
+      {text:"match input-interface access-group-name", correct:false},
+      {text:"match protocol access-group-name", correct:false},
+      {text:"match acl access-group-name", correct:false}
+    ],
+    explanation:"<code>match access-group access-group-name</code> specifies the ACL against whose contents packets are checked to determine if they belong to the class."
+  },
+  {
+    id:138, category:"QoS", subcategory:"MQC Framework", difficulty:"medium", type:"single",
+    question:"Which class-map match command classifies packets based on the name of the input interface they arrived on?",
+    options:[
+      {text:"match input-interface interface-name", correct:true},
+      {text:"match interface input interface-name", correct:false},
+      {text:"match access-group interface-name", correct:false},
+      {text:"match fr-dlci interface-name", correct:false}
+    ],
+    explanation:"<code>match input-interface interface-name</code> specifies the input interface used as the match criterion against which packets are checked for class membership."
+  },
+  {
+    id:139, category:"QoS", subcategory:"MQC Framework", difficulty:"medium", type:"multiple",
+    question:"Which two of the following are valid MQC match criteria used in a class-map for packet classification? (Choose 2)",
+    options:[
+      {text:"match protocol protocol", correct:true},
+      {text:"match fr-dlci dlci-number", correct:true},
+      {text:"match set-dscp dscp-value", correct:false},
+      {text:"match policy-map policy-map-name", correct:false}
+    ],
+    explanation:"<code>match protocol protocol</code> checks packets against a protocol name, and <code>match fr-dlci dlci-number</code> checks against a Frame Relay DLCI number. There are no <code>match set-dscp</code> or <code>match policy-map</code> criteria."
+  },
+  {
+    id:140, category:"QoS", subcategory:"MQC Framework", difficulty:"medium", type:"single",
+    question:"In config-cmap mode, which command matches traffic on a specific Frame Relay virtual circuit?",
+    options:[
+      {text:"match fr-dlci dlci-number", correct:true},
+      {text:"match frame-relay pvc dlci-number", correct:false},
+      {text:"match input-interface dlci-number", correct:false},
+      {text:"match protocol frame-relay dlci-number", correct:false}
+    ],
+    explanation:"<code>match fr-dlci dlci-number</code> specifies the Frame Relay DLCI number as the match criterion against which packets are checked to determine class membership."
+  },
+  // ========== QoS - Show commands (Table 13-5) ==========
+  {
+    id:141, category:"QoS", subcategory:"MQC Framework", difficulty:"easy", type:"single",
+    question:"Which IOS command displays all configured policy maps on the router?",
+    options:[
+      {text:"show policy-map", correct:true},
+      {text:"show policy-map interface", correct:false},
+      {text:"show class-map", correct:false},
+      {text:"show run policy-map all", correct:false}
+    ],
+    explanation:"<code>show policy-map</code> displays all configured policy maps. Adding <code>interface interface-name</code> shows runtime statistics on an interface."
+  },
+  {
+    id:142, category:"QoS", subcategory:"MQC Framework", difficulty:"medium", type:"single",
+    question:"Which command displays the configuration for a specific class within a specific policy map?",
+    options:[
+      {text:"show policy-map policy-map class class-name", correct:true},
+      {text:"show policy-map interface class class-name", correct:false},
+      {text:"show class-map policy-map class-name", correct:false},
+      {text:"show policy-map class class-name only", correct:false}
+    ],
+    explanation:"<code>show policy-map policy-map class class-name</code> displays the configuration for the specified class of the specified policy map. You enter both the policy map name and the class name."
+  },
+  {
+    id:143, category:"QoS", subcategory:"MQC Framework", difficulty:"medium", type:"single",
+    question:"Which command displays traffic statistics of all classes configured for all service policies on a specific interface, subinterface, or PVC?",
+    options:[
+      {text:"show policy-map interface interface-name", correct:true},
+      {text:"show policy-map interface-name statistics", correct:false},
+      {text:"show policy-map", correct:false},
+      {text:"show frame-relay pvc dlci", correct:false}
+    ],
+    explanation:"<code>show policy-map interface interface-name</code> displays traffic statistics for all classes of all service policies on the specified interface, subinterface, or PVC. When LLQ is configured it also shows the class configuration."
+  },
+  {
+    id:144, category:"QoS", subcategory:"MQC Framework", difficulty:"hard", type:"single",
+    question:"When a policy map contains multiple instances of the same class and is attached to an interface, what does the command <code>show policy-map interface interface_name output class class-name</code> return?",
+    options:[
+      {text:"Only the first instance of that class", correct:true},
+      {text:"All instances of that class combined", correct:false},
+      {text:"An error, because duplicate classes are not allowed", correct:false},
+      {text:"Only the last instance of that class", correct:false}
+    ],
+    explanation:"When a policy map has multiple instances of the same class and is attached to an interface, <code>show policy-map interface interface_name output class class-name</code> returns only the first instance."
+  },
+  {
+    id:145, category:"QoS", subcategory:"MQC Framework", difficulty:"medium", type:"single",
+    question:"Which command displays statistics about a Frame Relay PVC and the class configuration of the policy map on a specified DLCI?",
+    options:[
+      {text:"show frame-relay pvc dlci", correct:true},
+      {text:"show policy-map dlci", correct:false},
+      {text:"show fr-dlci pvc", correct:false},
+      {text:"show policy-map interface dlci", correct:false}
+    ],
+    explanation:"<code>show frame-relay pvc dlci</code> displays statistics about the PVC and the configuration of classes for the policy map on the specified DLCI."
+  },
+  // ========== QoS - Traffic Classification Map (Table 13-2) ==========
+  {
+    id:146, category:"QoS", subcategory:"Classification & Marking", difficulty:"medium", type:"single",
+    question:"According to the Cisco traffic classification model, what PHB, DSCP, and CoS are recommended for Voice (voice-only) media?",
+    options:[
+      {text:"EF, DSCP 46, CoS 5", correct:true},
+      {text:"CS6, DSCP 48, CoS 6", correct:false},
+      {text:"AF41, DSCP 34, CoS 4", correct:false},
+      {text:"CS3, DSCP 24, CoS 3", correct:false}
+    ],
+    explanation:"Voice media maps to EF with DSCP 46 and CoS 5 (ToS/IPP 5)."
+  },
+  {
+    id:147, category:"QoS", subcategory:"Classification & Marking", difficulty:"medium", type:"single",
+    question:"In the Cisco classification model, which application maps to PHB CS6 / DSCP 48 / CoS 6?",
+    options:[
+      {text:"Routing", correct:true},
+      {text:"Voice", correct:false},
+      {text:"Call Signaling", correct:false},
+      {text:"Network Management", correct:false}
+    ],
+    explanation:"Routing traffic is marked CS6, DSCP 48, CoS 6 — the highest class-selector value, reserved for network control/routing protocols."
+  },
+  {
+    id:148, category:"QoS", subcategory:"Classification & Marking", difficulty:"hard", type:"single",
+    question:"Per the Cisco classification table, which PHB and DSCP are used for Call Signaling traffic?",
+    options:[
+      {text:"CS3, DSCP 24 (CoS 3)", correct:true},
+      {text:"AF31, DSCP 26 (CoS 3)", correct:false},
+      {text:"CS4, DSCP 32 (CoS 3)", correct:false},
+      {text:"EF, DSCP 46 (CoS 5)", correct:false}
+    ],
+    explanation:"Call Signaling maps to CS3 with DSCP 24 and CoS 3."
+  },
+  {
+    id:149, category:"QoS", subcategory:"Classification & Marking", difficulty:"hard", type:"multiple",
+    question:"Per the Cisco traffic classification map, which two application-to-marking pairings are correct? (Choose 2)",
+    options:[
+      {text:"Voice/Video maps to AF41 / DSCP 34 / CoS 4", correct:true},
+      {text:"Transactional Data maps to AF21 / DSCP 18 / CoS 2", correct:true},
+      {text:"Bulk Data maps to CS1 / DSCP 8 / CoS 1", correct:false},
+      {text:"Telepresence Video maps to EF / DSCP 46 / CoS 5", correct:false}
+    ],
+    explanation:"Voice/Video = AF41/34/4 and Transactional Data = AF21/18/2. Bulk Data is AF11/10/1 (Scavenger is CS1/8/1), and Telepresence Video is CS4/32/4."
+  },
+  {
+    id:150, category:"QoS", subcategory:"Classification & Marking", difficulty:"medium", type:"single",
+    question:"In the Cisco classification model, which two applications share DSCP 32 (CS4) but are differentiated at Layer 2 by CoS 4 versus CoS 3?",
+    options:[
+      {text:"Telepresence Video (CoS 4) and Streaming Video (CoS 3)", correct:true},
+      {text:"Voice (CoS 4) and Call Signaling (CoS 3)", correct:false},
+      {text:"Routing (CoS 4) and Network Management (CoS 3)", correct:false},
+      {text:"Voice/Video (CoS 4) and Transactional Data (CoS 3)", correct:false}
+    ],
+    explanation:"Both Telepresence Video and Streaming Video use CS4/DSCP 32, but Telepresence Video is marked CoS 4 while Streaming Video is marked CoS 3."
+  },
+  {
+    id:151, category:"QoS", subcategory:"Classification & Marking", difficulty:"medium", type:"single",
+    question:"Per the Cisco classification table, what markings are used for Scavenger-class traffic?",
+    options:[
+      {text:"CS1, DSCP 8, CoS 1", correct:true},
+      {text:"AF11, DSCP 10, CoS 1", correct:false},
+      {text:"CS2, DSCP 16, CoS 2", correct:false},
+      {text:"Best Effort, DSCP 0, CoS 0", correct:false}
+    ],
+    explanation:"Scavenger traffic maps to CS1 with DSCP 8 and CoS 1. Bulk Data (AF11/10/1) shares CoS 1 but uses a different DSCP."
+  },
+  {
+    id:152, category:"QoS", subcategory:"Classification & Marking", difficulty:"easy", type:"single",
+    question:"In the Cisco classification model, which markings represent Best Effort traffic?",
+    options:[
+      {text:"ToS/IPP 0, DSCP 0, CoS 0", correct:true},
+      {text:"CS1, DSCP 8, CoS 1", correct:false},
+      {text:"AF11, DSCP 10, CoS 1", correct:false},
+      {text:"CS2, DSCP 16, CoS 2", correct:false}
+    ],
+    explanation:"Best Effort uses ToS/IP precedence 0, DSCP 0, and CoS 0 — no preferential treatment."
+  },
+  {
+    id:153, category:"QoS", subcategory:"Classification & Marking", difficulty:"medium", type:"single",
+    question:"Per the Cisco classification table, which markings are used for Network Management traffic?",
+    options:[
+      {text:"CS2, DSCP 16, CoS 2", correct:true},
+      {text:"AF21, DSCP 18, CoS 2", correct:false},
+      {text:"CS3, DSCP 24, CoS 3", correct:false},
+      {text:"CS1, DSCP 8, CoS 1", correct:false}
+    ],
+    explanation:"Network Management maps to CS2, DSCP 16, CoS 2. Transactional Data shares CoS 2 but uses AF21/DSCP 18."
+  },
+  // ========== CUBE - Outbound Calls to Cisco UBE (Table 26-8) ==========
+  {
+    id:154, category:"CUBE", subcategory:"Dial Peers", difficulty:"hard", type:"single",
+    question:"On Cisco UBE, you configure a <code>voice class uri 302 sip</code> with <code>pattern 10\\.1\\.2\\..*:5060</code>. What does this pattern match?",
+    options:[
+      {text:"Any 10.1.2.X host on port 5060 (e.g. the CUCM nodes' IP addresses and PSTN SIP port)", correct:true},
+      {text:"Only the exact IP address 10.1.2.5060", correct:false},
+      {text:"Any host in the 10.0.0.0/8 network on any port", correct:false},
+      {text:"The destination PSTN gateway IP address only", correct:false}
+    ],
+    explanation:"In a <code>voice class uri sip</code>, the <code>pattern</code> is a regex. <code>10\\.1\\.2\\..*:5060</code> matches any host in 10.1.2.x on port 5060 — used to match the CUCM nodes' IP addresses and port for identifying incoming PSTN-bound calls."
+  },
+  {
+    id:155, category:"CUBE", subcategory:"Dial Peers", difficulty:"hard", type:"single",
+    question:"In the CUBE outbound-call configuration, how is an incoming VoIP dial-peer from CUCM tied to a voice class URI and directed to a dial-peer group?",
+    options:[
+      {text:"With incoming uri via 302 and destination dpg 100 under the inbound dial-peer", correct:true},
+      {text:"With incoming called-number 302 and destination-pattern 100", correct:false},
+      {text:"With session target dpg 100 and voice class uri 302", correct:false},
+      {text:"With incoming dpg 100 and destination uri 302", correct:false}
+    ],
+    explanation:"The inbound dial-peer uses <code>incoming uri via 302</code> to match on the voice class URI 302, and <code>destination dpg 100</code> to route matched calls to dial-peer group 100."
+  },
+  {
+    id:156, category:"CUBE", subcategory:"Dial Peers", difficulty:"medium", type:"single",
+    question:"In the Cisco UBE outbound configuration, what does <code>voice class dpg 100</code> with <code>dial-peer 101 preference 1</code> accomplish?",
+    options:[
+      {text:"It defines a dial-peer group that selects outbound dial-peer 101 (with preference 1) for calls referencing dpg 100", correct:true},
+      {text:"It creates an inbound dial-peer numbered 101 with a URI match", correct:false},
+      {text:"It sets the session target of dial-peer 101 to preference 1", correct:false},
+      {text:"It configures a translation profile applied to dial-peer 101", correct:false}
+    ],
+    explanation:"<code>voice class dpg 100</code> defines dial-peer group 100; <code>dial-peer 101 preference 1</code> makes outbound dial-peer 101 the preferred egress peer for calls routed to that group via <code>destination dpg 100</code>."
+  },
+  {
+    id:157, category:"CUBE", subcategory:"Dial Peers", difficulty:"medium", type:"single",
+    question:"Which configuration defines the outbound VoIP dial-peer that sends PSTN-bound calls from Cisco UBE to the PSTN IP address?",
+    options:[
+      {text:"dial-peer voice 101 voip / destination-pattern .T / session target ipv4:<pstn ip address>", correct:true},
+      {text:"dial-peer voice 101 pots / destination-pattern .T / port 0/0/0", correct:false},
+      {text:"dial-peer voice 101 voip / incoming uri via 302 / destination dpg 100", correct:false},
+      {text:"voice class uri 101 sip / pattern .T / session target ipv4:<pstn ip address>", correct:false}
+    ],
+    explanation:"The outbound peer is <code>dial-peer voice 101 voip</code> with <code>destination-pattern .T</code> (variable-length match) and <code>session target ipv4:<pstn ip address></code> pointing at the PSTN device."
+  },
+  {
+    id:158, category:"CUBE", subcategory:"Dial Peers", difficulty:"medium", type:"single",
+    question:"In the outbound CUBE dial-peer to the PSTN, what does the destination pattern <code>.T</code> signify?",
+    options:[
+      {text:"A variable-length dialed string (interdigit timeout terminated)", correct:true},
+      {text:"Exactly two digits", correct:false},
+      {text:"A literal dot followed by the letter T", correct:false},
+      {text:"A toll-free (T) number prefix", correct:false}
+    ],
+    explanation:"In destination-pattern <code>.T</code>, the <code>T</code> indicates a variable-length pattern terminated by the interdigit timeout, allowing PSTN numbers of varying length to match."
   }
 ];
