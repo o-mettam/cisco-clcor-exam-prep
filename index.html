@@ -157,7 +157,7 @@
                     <span id="timer" class="font-mono font-semibold text-cisco-dark dark:text-white">120:00</span>
                 </div>
                 <div class="text-sm font-medium text-slate-500">
-                    <span id="currentQ" class="text-cisco-dark dark:text-white font-bold">1</span>/<span id="totalQ" class="dark:text-slate-400">115</span>
+                    <span id="currentQ" class="text-cisco-dark dark:text-white font-bold">1</span>/<span id="totalQ" class="dark:text-slate-400">0</span>
                 </div>
                 <button onclick="toggleDarkMode()" class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors" title="Toggle dark mode">
                     <svg class="w-5 h-5 text-slate-500 dark:text-slate-400 dark-toggle-icon" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/></svg>
@@ -261,7 +261,7 @@
             <div class="grid grid-cols-4 gap-4 mb-8">
                 <div class="text-center p-3 bg-cisco-green/10 rounded-xl"><div id="correctCount" class="text-2xl font-bold text-cisco-green">0</div><div class="text-xs text-slate-500">Correct</div></div>
                 <div class="text-center p-3 bg-cisco-red/10 rounded-xl"><div id="incorrectCount" class="text-2xl font-bold text-cisco-red">0</div><div class="text-xs text-slate-500">Incorrect</div></div>
-                <div class="text-center p-3 bg-slate-100 rounded-xl"><div id="skippedCount" class="text-2xl font-bold text-slate-500">0</div><div class="text-xs text-slate-500">Skipped</div></div>
+                <div class="text-center p-3 bg-slate-100 dark:bg-slate-700/50 rounded-xl"><div id="skippedCount" class="text-2xl font-bold text-slate-500 dark:text-slate-300">0</div><div class="text-xs text-slate-500 dark:text-slate-400">Skipped</div></div>
                 <div class="text-center p-3 bg-cisco-blue/10 rounded-xl"><div id="timeTaken" class="text-2xl font-bold text-cisco-blue">0:00</div><div class="text-xs text-slate-500">Time</div></div>
             </div>
             <h3 class="font-bold text-cisco-dark dark:text-white mb-4">Performance by Category</h3>
@@ -485,6 +485,11 @@ function init() {
         container.appendChild(btn);
     });
     updateAvailableCount();
+    renderHistory();
+    // Show "Resume" if a saved exam is in progress
+    if (loadProgress()) {
+        document.getElementById('resumeBtn').classList.remove('hidden');
+    }
 }
 
 function toggleCategory(cat, btn) {
@@ -561,7 +566,7 @@ function startTimer() {
     timerInterval = setInterval(() => {
         if (examMode === 'exam') {
             secondsRemaining--;
-            if (secondsRemaining <= 0) { clearInterval(timerInterval); endExam(); return; }
+            if (secondsRemaining <= 0) { clearInterval(timerInterval); clearProgress(); doEndExam(); return; }
         } else {
             secondsRemaining++;
         }
@@ -602,10 +607,9 @@ function renderQuestion() {
     </div>`;
     // Question text
     const isMulti = q.type === 'multiple';
-    const correctCount = isMulti ? q.options.filter(o => o.correct).length : 0;
     html += `<h2 class="text-lg font-semibold text-cisco-dark dark:text-white mb-4 leading-relaxed">${q.question}</h2>`;
     if (isMulti) {
-        html += `<p class="text-xs font-medium text-cisco-blue mb-3 flex items-center gap-1.5"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>Select ${correctCount} answers</p>`;
+        html += `<p class="text-xs font-medium text-cisco-blue mb-3 flex items-center gap-1.5"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>Select all that apply</p>`;
     }
     // CLI context
     if (q.cli_context) {
@@ -631,7 +635,7 @@ function renderQuestion() {
         const indicator = isMulti
             ? `<span class="flex-shrink-0 w-7 h-7 rounded border-2 ${stateClass.includes('correct') ? 'border-cisco-green bg-cisco-green text-white' : stateClass.includes('incorrect') ? 'border-cisco-red bg-cisco-red text-white' : isSelected ? 'border-cisco-blue bg-cisco-blue text-white' : 'border-slate-300 dark:border-slate-500 text-slate-400'} flex items-center justify-center text-xs font-bold">${isRevealed && opt.correct ? '✓' : isRevealed && isSelected && !opt.correct ? '✗' : isSelected ? '✓' : letter}</span>`
             : `<span class="flex-shrink-0 w-7 h-7 rounded-full border-2 ${stateClass.includes('correct') ? 'border-cisco-green bg-cisco-green text-white' : stateClass.includes('incorrect') ? 'border-cisco-red bg-cisco-red text-white' : isSelected ? 'border-cisco-blue bg-cisco-blue text-white' : 'border-slate-300 dark:border-slate-500 text-slate-400'} flex items-center justify-center text-xs font-bold">${isRevealed && opt.correct ? '✓' : isRevealed && isSelected && !opt.correct ? '✗' : letter}</span>`;
-        html += `<div class="option-btn flex items-start gap-3 p-4 rounded-xl border-2 border-slate-200 dark:border-slate-600 ${stateClass}" onclick="selectOption(${i})">
+        html += `<div class="option-btn flex items-start gap-3 p-4 rounded-xl border-2 border-slate-200 dark:border-slate-600 ${stateClass}" onclick="selectOption(${i})" role="${isMulti ? 'checkbox' : 'radio'}" tabindex="${isRevealed ? -1 : 0}" aria-checked="${isSelected}" aria-label="Option ${letter}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectOption(${i});}">
             ${indicator}
             <div class="flex-1 text-sm text-slate-700 dark:text-slate-300">${optText}</div>
         </div>`;
@@ -696,6 +700,7 @@ function escapeHtml(text) {
 function selectOption(i) {
     if (revealed.has(currentIndex)) return;
     const q = activeQuestions[currentIndex];
+    if (i < 0 || i >= q.options.length) return; // ignore out-of-range (e.g. number key with no matching option)
     if (q.type === 'multiple') {
         // Multi-select: toggle the option
         if (!(userAnswers[currentIndex] instanceof Set)) {
@@ -901,21 +906,21 @@ function buildReviewList(filter) {
         if (q.type === 'multiple' && userAns instanceof Set) {
             userText = [...userAns].map(idx => escapeHtml(q.options[idx]?.text.split('\n')[0] || '')).join('; ');
         } else if (userAns !== undefined && typeof userAns === 'number') {
-            userText = escapeHtml(q.options[userAns].text.split('\n')[0]);
+            userText = escapeHtml(q.options[userAns]?.text.split('\n')[0] || '');
         }
 
         list.innerHTML += `<div class="p-4 rounded-xl border ${isCorrect ? 'border-green-200 dark:border-green-800 bg-green-50/50 dark:bg-green-900/20' : userAns === undefined ? 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800' : 'border-red-200 dark:border-red-800 bg-red-50/50 dark:bg-red-900/20'}">
             <div class="flex items-center gap-2 mb-2">
                 <span class="text-xs font-bold ${isCorrect ? 'text-green-600' : userAns === undefined ? 'text-slate-400' : 'text-red-600'}">Q${i+1} ${isCorrect ? '✓' : userAns === undefined ? '—' : '✗'}</span>
-                <span class="text-xs px-1.5 py-0.5 rounded bg-slate-200 text-slate-500">${q.category}</span>
+                <span class="text-xs px-1.5 py-0.5 rounded bg-slate-200 text-slate-500 dark:bg-slate-700 dark:text-slate-300">${q.category}</span>
                 ${q.type === 'multiple' ? '<span class="text-xs px-1.5 py-0.5 rounded bg-cisco-blue/20 text-cisco-blue">Multi</span>' : ''}
-                ${isFlagged ? '<span class="text-xs px-1.5 py-0.5 rounded bg-amber-200 text-amber-700">Flagged</span>' : ''}
+                ${isFlagged ? '<span class="text-xs px-1.5 py-0.5 rounded bg-amber-200 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">Flagged</span>' : ''}
             </div>
-            <p class="text-sm font-medium text-cisco-dark mb-2">${q.question.replace(/<code>/g,'<code class="bg-slate-200 px-1 rounded text-xs font-mono">').replace(/<\/code>/g,'</code>')}</p>
-            ${userText && !isCorrect ? `<p class="text-xs text-red-600 mb-1"><strong>Your answer:</strong> ${userText}</p>` : ''}
-            <p class="text-xs text-green-700"><strong>Correct:</strong> ${correctText}</p>
+            <p class="text-sm font-medium text-cisco-dark dark:text-white mb-2">${q.question.replace(/<code>/g,'<code class="bg-slate-200 dark:bg-slate-700 px-1 rounded text-xs font-mono">').replace(/<\/code>/g,'</code>')}</p>
+            ${userText && !isCorrect ? `<p class="text-xs text-red-600 dark:text-red-400 mb-1"><strong>Your answer:</strong> ${userText}</p>` : ''}
+            <p class="text-xs text-green-700 dark:text-green-400"><strong>Correct:</strong> ${correctText}</p>
             <details class="mt-2"><summary class="text-xs text-cisco-blue cursor-pointer font-medium">Show explanation</summary>
-            <p class="text-xs text-slate-600 mt-2 leading-relaxed">${q.explanation}</p></details>
+            <p class="text-xs text-slate-600 dark:text-slate-300 mt-2 leading-relaxed">${q.explanation}</p></details>
         </div>`;
     });
     if (list.innerHTML === '') {
@@ -959,7 +964,9 @@ function retryIncorrect() {
     flagged = new Set();
     revealed = new Set();
     startTime = Date.now();
-    secondsRemaining = examMode === 'exam' ? 7200 : 0;
+    // Retry is always a self-paced practice review, regardless of the original mode
+    examMode = 'practice';
+    secondsRemaining = 0;
 
     document.getElementById('resultsScreen').classList.add('hidden');
     document.getElementById('examScreen').classList.remove('hidden');
@@ -972,6 +979,9 @@ function retryIncorrect() {
 // Keyboard shortcuts
 document.addEventListener('keydown', (e) => {
     if (document.getElementById('examScreen').classList.contains('hidden')) return;
+    // Don't hijack keys while a modal is open
+    if (!document.getElementById('navigatorModal').classList.contains('hidden')) return;
+    if (!document.getElementById('confirmEndModal').classList.contains('hidden')) return;
     if (e.key === 'ArrowRight' || e.key === 'n') nextQuestion();
     else if ((e.key === 'ArrowLeft' || e.key === 'p') && examMode !== 'exam') prevQuestion();
     else if (e.key === 'f') flagQuestion();
